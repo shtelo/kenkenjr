@@ -2,7 +2,9 @@ import sys
 
 sys.path.append('.')
 
-from kenkenjr import Log, Kenken
+from kenkenjr.utils import Log
+from kenkenjr.bot import Kenken
+
 
 if __name__ == '__main__':
     Log.auto('running codes...')
