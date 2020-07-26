@@ -1,7 +1,7 @@
 import discord
 from discord.ext.commands import Context, check
 
-from kenkenjr.bot import Kenken
+from kenkenjr.modules.custom.custom_bot import Kenken
 from kenkenjr.utils.literal import get_constant
 
 

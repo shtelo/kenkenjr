@@ -1,6 +1,6 @@
-# kenken_jr.py
+# kenkenjr
 
-kenken_jr.py는 슈텔로의 관리를 위해 새로운 봇을 개발하는 프로젝트이다.
+kenkenjr은 슈텔로의 관리를 위해 새로운 봇을 개발하는 프로젝트이다.
 
 ## 기록
 

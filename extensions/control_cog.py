@@ -2,7 +2,7 @@ from discord import NotFound, ClientException, Forbidden, HTTPException
 from discord.ext.commands import Context
 
 from kenkenjr import modules
-from kenkenjr.bot import Kenken
+from kenkenjr.modules.custom.custom_bot import Kenken
 from kenkenjr.modules import CustomCog, owner_only
 from kenkenjr.utils import get_cog, literals, reload_literals
 
