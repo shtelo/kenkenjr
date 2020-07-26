@@ -18,6 +18,7 @@ kenken_jr.py는 슈텔로의 관리를 위해 새로운 봇을 개발하는 프�
 
 ```
 # 프로젝트를 시작했다.
+# kenken_the_bot 프로젝트에서 기본적인 기능을 복제했다.
 + 문자열 상수를 파일로부터 불러오는 literal 모듈을 추가했다.
 + after_ready, is_complete 등의 메소드를 정의하는 CustomCog 클래스를 추가했다.
 ~ BaseCog 클래스를 수정했다.
