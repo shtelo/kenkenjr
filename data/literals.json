@@ -130,7 +130,8 @@
     ":ticket:": "\uD83C\uDFAB",
     ":regional_indicator_d:": "\uD83C\uDDE9",
     ":white_check_mark:": "✅",
-    ":name_badge:": "\uD83D\uDCDB"
+    ":name_badge:": "\uD83D\uDCDB",
+    ":dvd:": "\uD83D\uDCC0"
   },
   "on_command_error": {
     "command_on_cooldown": "%s 명령어를 너무 많이 사용했어! %s초 뒤에 다시 시도해줘!"
@@ -214,5 +215,43 @@
   "regulation_all": {
     "start": "슈텔로 회칙을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게!",
     "done": "슈텔로 회칙을 조회했어! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/document/d/17rg7J1gajNO1NVhbbPgjntSVqK1rn1gwh4DwIaEz9I4/edit#"
+  },
+  "start_round": {
+    "start": "새 라운드가 시작됐어!",
+    "winner": "이번 라운드의 승자는 %s!",
+    "draw": "이번 라운드는 무승부야!"
+  },
+  "get_chip_str": {
+    "emoji": "\uD83D\uDCC0 "
+  },
+  "get_chip_embed": {
+    "chip_title": "\uD83D\uDCC0 현재 칩",
+    "chip_description": "가지고 있는 칩의 정보야!",
+    "chip_name": "**%s**의 칩",
+    "betting_name": "**%s**의 배팅"
+  },
+  "get_card_embed": {
+    "emoji": ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "\uD83D\uDD1F"],
+    "card_title": "**%s**의 카드"
+  },
+  "start_betting": {
+    "done": "배팅이 끝났어!",
+    "turn": "%s 배팅할 차례야!",
+    "invalid_raise": "레이즈를 하려면 숫자만 입력하면 돼!",
+    "invalid_all_in": "올 인을 하려면 상대의 배팅이 내 칩보다 많아야돼!",
+    "invalid_betting": "상대의 배팅보다 적게 배팅할 수 없어!",
+    "chip_not_enough": "칩이 부족해서 배팅할 수 없어!",
+    "invalid_fold": "첫 배팅에서는 폴드를 할 수 없어!"
+  },
+  "indian_poker": {
+    "start": "게임이 시작됐어!",
+    "already_playing": "%s 이미 다른 게임에 참가하고 있어!"
+  },
+  "game_close": {
+    "done": "%s 진행 중이던 게임이 종료됐어!",
+    "not_found": "게임을 찾을 수 없어!"
+  },
+  "IndianPoker.start.start_": {
+    "winner": "최종 승자는 %s!!!"
   }
 }
