@@ -181,6 +181,7 @@ class IndianPoker(Game):
             next_indian = betting_queue[1]
             betting_type = None
             betting_count = 0
+            done = False
             if dealer_message is not None:
                 await dealer_message.delete()
             dealer_message = await self.ctx.send(literal['turn'] % current_indian.member.mention,
