@@ -1,4 +1,5 @@
 data/google_api/
+data/logs/
 .env
 *.pyc
 __pycache__/
