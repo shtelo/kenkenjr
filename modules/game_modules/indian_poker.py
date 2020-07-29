@@ -136,7 +136,10 @@ class IndianPoker(Game):
                  self.ctx.send(embed=self.get_card_embed(self.indian2))]
         await asyncio.wait(tasks)
         if winner is None:
-            winner = self.indian1 if self.indian1.card > self.indian2.card else self.indian2
+            if self.indian1.card > self.indian2.card:
+                winner = self.indian1
+            elif self.indian1.card < self.indian2.card:
+                winner = self.indian2
         if winner is self.indian1:
             self.win_round(self.indian1)
         elif winner is self.indian2:
