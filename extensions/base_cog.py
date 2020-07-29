@@ -2,9 +2,9 @@ from random import choice, random
 
 from discord import Message
 from discord.ext import commands
-from discord.ext.commands import Context, Cog
+from discord.ext.commands import Context, Cog, Bot
 
-from kenkenjr.modules import CustomCog, command, tokens_len, Bot
+from kenkenjr.modules import CustomCog, command, tokens_len
 from kenkenjr.utils import get_cog, get_path, Log
 
 

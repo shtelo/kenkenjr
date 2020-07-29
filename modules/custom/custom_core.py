@@ -45,7 +45,7 @@ class CustomCommand(CustomGroupMixin, Command):
 
 
 class CustomGroup(CustomCommand, Group):
-    def __init__(self, func, *args, **attrs):
+    def __init__(self, func, **attrs):
         super().__init__(func, **attrs)
 
 

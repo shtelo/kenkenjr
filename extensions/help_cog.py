@@ -1,9 +1,9 @@
 from typing import List
 
-from discord.ext.commands import Context, Cog, Group, Command
+from discord.ext.commands import Context, Cog, Group, Command, Bot
 
 from kenkenjr import modules
-from kenkenjr.modules import CustomCog, Bot, ChainedEmbed
+from kenkenjr.modules import CustomCog, ChainedEmbed
 from kenkenjr.utils import get_cog, get_constant, literals, get_check
 
 
