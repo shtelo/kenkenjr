@@ -24,13 +24,10 @@ class Game(ABC):
         pass
 
     def stop(self) -> bool:
-        print('closing games...')
         if self in Game._instances:
             Game._instances.remove(self)
             if self.task is not None and not self.task.cancelled():
                 self.task.cancel()
-                print('task cancelled...')
-                print(Game._instances)
             return True
         return False
 

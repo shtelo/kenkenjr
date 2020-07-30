@@ -168,52 +168,64 @@ class Yacht(Game):
                 break
         await score_message.edit(embed=self.get_score_embed())
 
+    async def wait_for_reaction_change(self, check):
+        on_reaction_add = asyncio.create_task(self.client.wait_for('reaction_add', check=check))
+        on_reaction_remove = asyncio.create_task(self.client.wait_for('reaction_remove', check=check))
+        pending_tasks = [on_reaction_add, on_reaction_remove]
+        done_tasks, pending_tasks = await asyncio.wait(pending_tasks, return_when=asyncio.FIRST_COMPLETED)
+        for pending_task in pending_tasks:
+            pending_task.cancel()
+        reaction_ = None
+        user_ = None
+        added_ = False
+        for done_task in done_tasks:
+            reaction_, user_ = await done_task
+            added_ = done_task is on_reaction_add
+        return reaction_, user_, added_
+
     async def get_dice_reaction(self, message: Message):
-        emojis = DICE_ID.copy() + [REROLL_EMOJI, CONFIRM_EMOJI]
+
+        emojis = [dice[0] for dice in sorted(self.dice.items(), key=lambda item: item[1])] \
+                 + [REROLL_EMOJI, CONFIRM_EMOJI]
         asyncio.create_task(add_reactions(message, emojis))
 
         def is_dice_reaction(reaction_: Reaction, user_: User):
             return user_ == self.player and reaction_.message.id == message.id \
                    and (str(reaction_) in (REROLL_EMOJI, CONFIRM_EMOJI) or str(reaction_) in DICE_ID)
 
-        async def wait_for_reaction_change():
-            on_reaction_add = asyncio.create_task(self.client.wait_for('reaction_add', check=is_dice_reaction))
-            on_reaction_remove = asyncio.create_task(self.client.wait_for('reaction_remove', check=is_dice_reaction))
-            pending_tasks = [on_reaction_add, on_reaction_remove]
-            done_tasks, pending_tasks = await asyncio.wait(pending_tasks, return_when=asyncio.FIRST_COMPLETED)
-            for pending_task in pending_tasks:
-                pending_task.cancel()
-            added_ = False
-            for done_task in done_tasks:
-                reaction_, user_ = await done_task
-                added_ = done_task is on_reaction_add
-            return reaction_, user_, added_
-
         selected = []
         last_emoji = ''
         while not (selected and last_emoji == REROLL_EMOJI) and not (last_emoji == CONFIRM_EMOJI):
-            reaction, _, added = await wait_for_reaction_change()
+            reaction, _, added = await self.wait_for_reaction_change(is_dice_reaction)
             last_emoji = str(reaction)
             if last_emoji in DICE_ID:
                 if added:
                     selected.append(last_emoji)
                 elif last_emoji in selected:
                     selected.remove(last_emoji)
-        message = await self.player.fetch_message(message.id)
-        tasks = [r.remove(self.client.user) for r in message.reactions]
-        asyncio.create_task(asyncio.wait(tasks))
+        asyncio.create_task(message.delete(delay=1))
         return selected if last_emoji == REROLL_EMOJI else []
 
     async def get_category_reaction(self, message: Message):
         selectable_categories = [item[0][1] for item in self.scores.items() if item[1] == -1]
-        asyncio.create_task(add_reactions(message, selectable_categories))
+        asyncio.create_task(add_reactions(message, selectable_categories + [CONFIRM_EMOJI]))
 
         def is_category_reaction(reaction_: Reaction, user_: User):
             return user_ == self.player and reaction_.message.id == message.id \
-                   and str(reaction_) in selectable_categories
+                   and str(reaction_) in selectable_categories + [CONFIRM_EMOJI]
 
-        reaction, _ = await self.client.wait_for('reaction_add', check=is_category_reaction)
+        selected = []
+        while True:
+            reaction, _, added = await self.wait_for_reaction_change(is_category_reaction)
+            if str(reaction) == CONFIRM_EMOJI:
+                for category in CATEGORIES:
+                    if selected[-1] in category:
+                        self.scores[category] = self.get_score_of_category(category)
+                        break
+                break
+            elif added:
+                selected.append(str(reaction))
+            elif str(reaction) in selected:
+                selected.remove(str(reaction))
         message = await self.player.fetch_message(message.id)
-        tasks = [r.remove(self.client.user) for r in message.reactions]
-        asyncio.create_task(asyncio.wait(tasks))
         return str(reaction)
