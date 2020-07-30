@@ -15,13 +15,13 @@ class ProtocolCog(CustomCog, BotProtocol, name=get_cog('ProtocolCog')['name']):
         super().__init__(client)
         self.client = client
 
-    @Cog.listener()
+    @CustomCog.listener()
     async def on_message(self, message):
         if message.author.id == get_constant('kenken_id'):
             return
         await super().on_message(message)
 
-    @Cog.listener()
+    @CustomCog.listener()
     async def on_command_error(self, ctx: commands.Context, _):
         if ctx.guild is not None and ctx.prefix in self.client.command_prefix:
             Log.command('pass protocol request generated.')

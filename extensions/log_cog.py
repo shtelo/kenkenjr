@@ -18,17 +18,17 @@ class LogCog(CustomCog, name=get_cog('LogCog')['name']):
         super().__init__(client)
         self.client: Bot = client
 
-    @Cog.listener()
+    @CustomCog.listener()
     async def on_ready(self):
         Log.auto(f'{self.client.user} on ready!')
 
-    @Cog.listener()
+    @CustomCog.listener()
     async def on_message(self, msg: Message):
         if msg.content:
             Log.auto(f'\n\t{msg.guild}/{msg.channel}/{msg.author}/{msg.id}\n\t{msg.content}',
                      message=msg)
 
-    @Cog.listener()
+    @CustomCog.listener()
     async def on_message_edit(self, msg_before: Message, msg_after: Message):
         if msg_before.content or msg_after.content:
             Log.auto(f'\n\t{msg_before.guild}/{msg_before.channel}/{msg_before.author}/{msg_before.id}\n\t'
@@ -38,14 +38,14 @@ class LogCog(CustomCog, name=get_cog('LogCog')['name']):
         ctx = await self.client.get_context(msg_after)
         await self.client.invoke(ctx)
 
-    @Cog.listener()
+    @CustomCog.listener()
     async def on_message_delete(self, msg: Message):
         if msg.content:
             Log.auto(f'\n\t{msg.guild}/{msg.channel}/{msg.author}/{msg.id}\n\t'
                      f'content : {msg.content}',
                      message=msg)
 
-    @Cog.listener()
+    @CustomCog.listener()
     async def on_command_error(self, ctx: Context, error: Exception):
         if isinstance(error, CommandNotFound):
             Log.error(f'not command : {error}')

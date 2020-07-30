@@ -1,12 +1,12 @@
 import asyncio
 from random import randrange
 
-from discord import Member
+from discord import Member, User
 from discord.ext.commands import Bot, Context
 
 from kenkenjr import modules
-from kenkenjr.modules import CustomCog, guild_only, ChainedEmbed, IndianPoker
-from kenkenjr.modules.game_modules.game import Game
+from kenkenjr.modules import CustomCog, guild_only, ChainedEmbed, Yacht, IndianPoker
+from kenkenjr.modules.games.game import Game
 from kenkenjr.utils import get_cog, literals
 
 
@@ -47,7 +47,7 @@ class GameCog(CustomCog, name=get_cog('GameCog')['name']):
 
     @modules.command(name='인디언포커', aliases=('인디언',))
     @guild_only()
-    async def indian_poker(self, ctx: Context, player1: Member, player2: Member, chip: int = 15):
+    async def indian_poker(self, ctx: Context, player1: User, player2: User, chip: int = 15):
         literal = literals('indian_poker')
         if IndianPoker.get_game(player1) is not None:
             await ctx.send(literal['already_playing'] % player1)
@@ -56,7 +56,24 @@ class GameCog(CustomCog, name=get_cog('GameCog')['name']):
         else:
             game = IndianPoker(ctx, player1, player2, chip)
             await ctx.send(literal['start'])
-            await game.start()
+            await game.run()
+
+    @modules.group(name='요트')
+    async def yacht(self, ctx: Context):
+        game = Yacht.get_game(ctx.author)
+        if game is not None and isinstance(game, Yacht):
+            await ctx.send()
+        else:
+            game = Yacht(ctx, ctx.author)
+            await game.run()
+
+    @yacht.command(name='도움말', aliases=('규칙',))
+    async def yacht_help(self, ctx: Context):
+        literal = literals('yacht_help')
+        help_embed: ChainedEmbed = ChainedEmbed(title=literal['title'], description=literal['description'])
+        for field in literal['fields']:
+            help_embed.add_field(name=field['name'], value=field['value'])
+        await ctx.send(embed=help_embed)
 
     @modules.group(name='게임')
     async def game(self, ctx: Context):
@@ -66,7 +83,7 @@ class GameCog(CustomCog, name=get_cog('GameCog')['name']):
     async def game_close(self, ctx: Context):
         literal = literals('game_close')
         game = Game.get_game(ctx.author)
-        if game is None or not game.close():
+        if game is None or not game.stop():
             await ctx.send(literal['not_found'])
         else:
             await ctx.send(literal['done'] % ' '.join([player.mention for player in game.players]))
