@@ -142,10 +142,12 @@ class Yacht(Game):
         return score_embed
 
     async def start(self):
+        literal = literals('Yacht.start')
+        await self.player.send(literal['start'])
         for _ in range(len(self.scores)):
             self.round += 1
             await self.start_round()
-        await self.player.send(literals('Yacht.start')["done"] % (self.player.mention, self.get_total_score()))
+        await self.player.send(literal["done"] % (self.player.mention, self.get_total_score()))
 
     async def start_round(self):
         literal = literals('Yacht.start_round')

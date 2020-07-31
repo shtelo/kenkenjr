@@ -89,10 +89,12 @@ class IndianPoker(Game):
         self.indian2.betting = 0
 
     async def start(self):
+        literal = literals('IndianPoker.start')
+        await self.ctx.send(literal['start'])
         winner = None
         while winner is None:
             winner = await self.start_round()
-        await self.ctx.send(literals('IndianPoker.start')['winner'] % winner.user.mention)
+        await self.ctx.send(literal['winner'] % winner.user.mention)
 
     async def start_round(self) -> Optional[Indian]:
         literal = literals('IndianPoker.start_round')

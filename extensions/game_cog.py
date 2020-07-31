@@ -9,12 +9,13 @@ from kenkenjr.modules import CustomCog, guild_only, ChainedEmbed, Yacht, IndianP
 from kenkenjr.modules.games.game import Game
 from kenkenjr.utils import get_cog, literals
 
+ALREADY_PLAYING = literals('game_cog')['already_playing']
+
 
 class GameCog(CustomCog, name=get_cog('GameCog')['name']):
     """
     심심할 때 한 번 쯤 시험삼아 써 볼만한 기능들을 포함합니다.
     """
-
     def __init__(self, client: Bot):
         super().__init__(client)
         self.client: Bot = client
@@ -48,21 +49,19 @@ class GameCog(CustomCog, name=get_cog('GameCog')['name']):
     @modules.command(name='인디언포커', aliases=('인디언',))
     @guild_only()
     async def indian_poker(self, ctx: Context, player1: User, player2: User, chip: int = 15):
-        literal = literals('indian_poker')
         if IndianPoker.get_game(player1) is not None:
-            await ctx.send(literal['already_playing'] % player1)
+            await ctx.send(ALREADY_PLAYING % player1)
         elif IndianPoker.get_game(player2) is not None:
-            await ctx.send(literal['already_playing'] % player2)
+            await ctx.send(ALREADY_PLAYING % player2)
         else:
             game = IndianPoker(ctx, player1, player2, chip)
-            await ctx.send(literal['start'])
             await game.run()
 
     @modules.group(name='요트')
     async def yacht(self, ctx: Context):
         game = Yacht.get_game(ctx.author)
         if game is not None and isinstance(game, Yacht):
-            await ctx.send()
+            await ctx.send(ALREADY_PLAYING % ctx.author)
         else:
             game = Yacht(ctx, ctx.author)
             await game.run()
