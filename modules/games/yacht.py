@@ -219,6 +219,8 @@ class Yacht(Game):
         selected = []
         while True:
             reaction, _, added = await self.wait_for_reaction_change(is_category_reaction)
+            if not selected:
+                continue
             if str(reaction) == CONFIRM_EMOJI:
                 for category in CATEGORIES:
                     if selected[-1] in category:
