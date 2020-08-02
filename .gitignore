@@ -3,3 +3,4 @@ data/logs/
 .env
 *.pyc
 __pycache__/
+.gitignore
