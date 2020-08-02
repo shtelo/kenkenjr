@@ -1,6 +1,6 @@
 from discord import TextChannel, Message, NotFound
 from discord.ext import commands
-from discord.ext.commands import Bot, Context, TextChannelConverter, BadArgument, Cog
+from discord.ext.commands import Bot, Context, TextChannelConverter, BadArgument
 
 from kenkenjr.modules import BotProtocol, Request, CustomCog
 from kenkenjr.utils import get_cog, get_constant, Log
@@ -13,7 +13,8 @@ class ProtocolCog(CustomCog, BotProtocol, name=get_cog('ProtocolCog')['name']):
 
     def __init__(self, client: Bot):
         super().__init__(client)
-        self.client = client
+        self.client: Bot = client
+        self.deck: dict = {}
 
     @CustomCog.listener()
     async def on_message(self, message):

@@ -2,7 +2,7 @@ from discord import NotFound, ClientException, Forbidden, HTTPException
 from discord.ext.commands import Context
 
 from kenkenjr import modules
-from kenkenjr.modules import CustomCog, owner_only
+from kenkenjr.modules import CustomCog, owner_only, guild_only
 from kenkenjr.modules.custom.custom_bot import Kenken
 from kenkenjr.utils import get_cog, literals, reload_literals
 
@@ -28,6 +28,7 @@ class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):
 
     @modules.command(name='삭제', aliases=('delete',))
     @owner_only()
+    @guild_only()
     async def delete(self, ctx: Context, count: int):
         count = min(max(1, count), 100)
         messages = await ctx.channel.purge(limit=count, bulk=True)
