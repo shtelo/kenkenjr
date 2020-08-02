@@ -50,9 +50,9 @@ class GameCog(CustomCog, name=get_cog('GameCog')['name']):
     @guild_only()
     async def indian_poker(self, ctx: Context, player1: User, player2: User, chip: int = 15):
         if IndianPoker.get_game(player1) is not None:
-            await ctx.send(ALREADY_PLAYING % player1)
+            await ctx.send(ALREADY_PLAYING % player1.mention)
         elif IndianPoker.get_game(player2) is not None:
-            await ctx.send(ALREADY_PLAYING % player2)
+            await ctx.send(ALREADY_PLAYING % player2.mention)
         else:
             game = IndianPoker(ctx, player1, player2, chip)
             await game.run()
@@ -61,7 +61,7 @@ class GameCog(CustomCog, name=get_cog('GameCog')['name']):
     async def yacht(self, ctx: Context):
         game = Yacht.get_game(ctx.author)
         if game is not None and isinstance(game, Yacht):
-            await ctx.send(ALREADY_PLAYING % ctx.author)
+            await ctx.send(ALREADY_PLAYING % ctx.author.mention)
         else:
             game = Yacht(ctx, ctx.author)
             await game.run()

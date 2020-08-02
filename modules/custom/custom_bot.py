@@ -9,10 +9,10 @@ from kenkenjr.utils import get_path, get_constant, Log, singleton
 
 @singleton
 class Kenken(Bot):
-    def __init__(self):
+    def __init__(self, args: list):
         super().__init__([get_constant('default_prefix')])
         self.load_all_extensions()
-        get_event_loop().run_until_complete(self.start(config('TOKEN')))
+        get_event_loop().run_until_complete(self.start(config('TOKEN') if 'b' not in args else config('BETA_TOKEN')))
 
     def load_all_extensions(self):
         for file_name in listdir(get_path('extensions')):

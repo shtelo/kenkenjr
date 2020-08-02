@@ -35,18 +35,18 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
     def __init__(self, client: Bot):
         super().__init__(client)
         self.client: Bot = client
-        self.keys: list = []
-        self.recent_regulation: Optional[FreshData] = None
+        self.application_keys: list = []  # table keys of application spreadsheet
+        self.regulation: Optional[FreshData] = None  # recently loaded regulation
 
     def get_sheet(self):
         constant = get_constant('application')
         replies = sheet_read(constant['sheet_id'], constant['read_range'])
-        self.keys = replies.pop(0)
+        self.application_keys = replies.pop(0)
         return replies
 
     def get_application_embed(self, data: list):
         literal = literals('get_application_embed')
-        while len(data) < len(self.keys):
+        while len(data) < len(self.application_keys):
             data.append('')
         discord_id = data[DISCORD_ID]
         title = literal['title'] % discord_id
@@ -70,16 +70,16 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
 
     def get_application_raw_embed(self, data: list):
         literal = literals('get_application_raw_embed')
-        while len(data) < len(self.keys):
+        while len(data) < len(self.application_keys):
             data.append('')
         discord_id = data[DISCORD_ID]
         title = literal['title'] % discord_id
         if data[DONE] in TRUE:
             title += literal['done']
         embeds = ChainedEmbed(title=title, description=literal['description'])
-        for i in range(len(self.keys) - 1):
+        for i in range(len(self.application_keys) - 1):
             if data[i]:
-                embeds.add_field(name=self.keys[i], value='```\n' + data[i] + '\n```')
+                embeds.add_field(name=self.application_keys[i], value='```\n' + data[i] + '\n```')
         return embeds
 
     @modules.group(name='가입신청서', aliases=('가입', '신청서'))
@@ -140,12 +140,12 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
     async def regulation(self, ctx: Context, *, keyword: str = ''):
         literal = literals('regulation')
         message = await ctx.send(literal['start'])
-        if self.recent_regulation is None \
-                or (datetime.now() - self.recent_regulation.timestamp).total_seconds() > HOUR:
+        if self.regulation is None \
+                or (datetime.now() - self.regulation.timestamp).total_seconds() > HOUR:
             paragraphs = wrap_codeblock(doc_read(get_constant('regulation')['doc_id']), split_paragraph=True)
-            self.recent_regulation = FreshData(paragraphs)
+            self.regulation = FreshData(paragraphs)
         else:
-            paragraphs = self.recent_regulation.data
+            paragraphs = self.regulation.data
         await message.edit(content=literal['done'])
         if not keyword:
             await ctx.author.send(paragraphs[0])
