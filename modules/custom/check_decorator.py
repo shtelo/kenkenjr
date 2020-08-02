@@ -1,8 +1,8 @@
 import discord
 from discord.ext.commands import Context, check
 
-from kenkenjr.modules.custom.custom_bot import Kenken
-from kenkenjr.utils.literal import get_constant
+from modules.custom.custom_bot import Kenken
+from utils.literal import get_constant
 
 
 def owner_only():

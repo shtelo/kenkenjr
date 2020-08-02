@@ -6,7 +6,7 @@ from os.path import isdir, isfile
 from discord import Message
 from slugify import slugify
 
-from kenkenjr.utils import get_path, get_constant
+from utils import get_path, get_constant
 
 
 class Log:

@@ -15,7 +15,10 @@
     "regulation": {
       "doc_id": "17rg7J1gajNO1NVhbbPgjntSVqK1rn1gwh4DwIaEz9I4"
     },
-    "extension_name": "kenkenjr.extensions.%s"
+    "extension_name": "kenkenjr.extensions.%s",
+    "kenon": "Ꝁ",
+    "elite": "ē",
+    "terro": "Ŧ"
   },
   "_path_": {
     "data": "./kenkenjr/data/",
@@ -93,6 +96,10 @@
     "ShteloCog": {
       "name": "슈텔로",
       "emoji": "⭐"
+    },
+    "EconomyCog": {
+      "name": "경제",
+      "emoji": "\uD83D\uDCB0"
     }
   },
   "_check_": {
@@ -161,7 +168,8 @@
     ":asterisk:": "*️⃣",
     ":cruise_ship:": "\uD83D\uDEF3️",
     ":bellhop:": "\uD83D\uDECE️",
-    ":bar_chart:": "\uD83D\uDCCA"
+    ":bar_chart:": "\uD83D\uDCCA",
+    ":moneybag:": "\uD83D\uDCB0"
   },
   "on_command_error": {
     "command_on_cooldown": "%s 명령어를 너무 많이 사용했어! %s초 뒤에 다시 시도해줘!"

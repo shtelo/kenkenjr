@@ -2,8 +2,8 @@ from discord import TextChannel, Message, NotFound
 from discord.ext import commands
 from discord.ext.commands import Bot, Context, TextChannelConverter, BadArgument
 
-from kenkenjr.modules import BotProtocol, Request, CustomCog
-from kenkenjr.utils import get_cog, get_constant, Log
+from modules import BotProtocol, Request, CustomCog
+from utils import get_cog, get_constant, Log
 
 
 class ProtocolCog(CustomCog, BotProtocol, name=get_cog('ProtocolCog')['name']):

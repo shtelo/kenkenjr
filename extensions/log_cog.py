@@ -4,9 +4,9 @@ from discord import Message
 from discord.ext.commands import Cog, Bot, Context, CommandNotFound, CheckFailure, BadArgument, MissingRequiredArgument, \
     DisabledCommand, CommandOnCooldown, BucketType
 
-from kenkenjr.modules.custom.custom_cog import CustomCog
-from kenkenjr.utils.literal import get_cog, literals
-from kenkenjr.utils.log import Log
+from modules.custom.custom_cog import CustomCog
+from utils.literal import get_cog, literals
+from utils.log import Log
 
 
 class LogCog(CustomCog, name=get_cog('LogCog')['name']):

@@ -2,9 +2,9 @@ from typing import List
 
 from discord.ext.commands import Context, Cog, Group, Command, Bot
 
-from kenkenjr import modules
-from kenkenjr.modules import CustomCog, ChainedEmbed
-from kenkenjr.utils import get_cog, get_constant, literals, get_check
+import modules
+from modules import CustomCog, ChainedEmbed
+from utils import get_cog, get_constant, literals, get_check
 
 
 def brief_cog(cog: Cog):

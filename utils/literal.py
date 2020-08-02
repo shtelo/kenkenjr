@@ -1,6 +1,6 @@
 import json
 
-from kenkenjr.utils import singleton
+from utils import singleton
 
 
 def get_constant(name: str):

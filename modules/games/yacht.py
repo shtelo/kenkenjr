@@ -5,9 +5,9 @@ from typing import Dict, List, Optional
 from discord import Message, User, Reaction
 from discord.ext.commands import Bot, Context
 
-from kenkenjr.modules import ChainedEmbed
-from kenkenjr.modules.games.game import Game
-from kenkenjr.utils import literals, get_emoji
+from modules import ChainedEmbed
+from modules.games.game import Game
+from utils import literals, get_emoji
 
 ONES = ('Ones', get_emoji(':one:'))
 TWOS = ('Twos', get_emoji(':two:'))

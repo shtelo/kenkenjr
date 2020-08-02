@@ -4,10 +4,10 @@ from random import randrange
 from discord import Member, User
 from discord.ext.commands import Bot, Context
 
-from kenkenjr import modules
-from kenkenjr.modules import CustomCog, guild_only, ChainedEmbed, Yacht, IndianPoker
-from kenkenjr.modules.games.game import Game
-from kenkenjr.utils import get_cog, literals
+import modules
+from modules import CustomCog, guild_only, ChainedEmbed, Yacht, IndianPoker
+from modules.games.game import Game
+from utils import get_cog, literals
 
 ALREADY_PLAYING = literals('game_cog')['already_playing']
 

@@ -4,8 +4,8 @@ from discord import Message
 from discord.ext import commands
 from discord.ext.commands import Context, Bot
 
-from kenkenjr.modules import CustomCog, command, tokens_len
-from kenkenjr.utils import get_cog, get_path, Log
+from modules import CustomCog, command, tokens_len
+from utils import get_cog, get_path, Log
 
 
 class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
