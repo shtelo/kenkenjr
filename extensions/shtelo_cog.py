@@ -3,9 +3,9 @@ from typing import Optional
 
 from discord.ext.commands import Bot, Context
 
-from kenkenjr import modules
-from kenkenjr.modules import CustomCog, sheet_read, ChainedEmbed, doc_read
-from kenkenjr.utils import get_cog, literals, wrap_codeblock, get_constant
+import modules
+from modules import CustomCog, sheet_read, ChainedEmbed, doc_read
+from utils import get_cog, literals, wrap_codeblock, get_constant
 
 TIMESTAMP = 0
 EMAIL = 1

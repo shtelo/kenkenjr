@@ -4,7 +4,7 @@ from os import listdir
 from decouple import config
 from discord.ext.commands import Bot, ExtensionAlreadyLoaded, ExtensionFailed, NoEntryPointError, ExtensionError
 
-from kenkenjr.utils import get_path, get_constant, Log, singleton
+from utils import get_path, get_constant, Log, singleton
 
 
 @singleton

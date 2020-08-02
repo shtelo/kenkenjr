@@ -1,6 +1,6 @@
 from discord.ext.commands import Cog, Bot
 
-from kenkenjr.utils import get_cog
+from utils import get_cog
 
 
 class CustomCog(Cog):

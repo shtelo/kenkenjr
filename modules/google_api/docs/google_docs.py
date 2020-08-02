@@ -6,7 +6,7 @@ from oauth2client import client
 from oauth2client import file
 from oauth2client import tools
 
-from kenkenjr.utils import get_path
+from utils import get_path
 
 SCOPES = 'https://www.googleapis.com/auth/documents.readonly'
 DISCOVERY_DOC = 'https://docs.googleapis.com/$discovery/rest?version=v1'

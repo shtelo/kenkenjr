@@ -6,9 +6,9 @@ from typing import Optional
 from discord import Message, User
 from discord.ext.commands import Bot, Context
 
-from kenkenjr.modules import ChainedEmbed
-from kenkenjr.modules.games.game import Game
-from kenkenjr.utils import literals
+from modules import ChainedEmbed
+from modules.games.game import Game
+from utils import literals
 
 CALL = ('콜', 'call')
 ALL_IN = ('올인', '올 인', 'all in', 'allin')

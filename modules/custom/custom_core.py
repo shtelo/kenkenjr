@@ -1,6 +1,6 @@
 from discord.ext.commands import Command, Group, GroupMixin
 
-from kenkenjr.utils import get_brief, get_help
+from utils import get_brief, get_help
 
 
 class CustomGroupMixin(GroupMixin):

@@ -1,10 +1,10 @@
 from discord import NotFound, ClientException, Forbidden, HTTPException
 from discord.ext.commands import Context
 
-from kenkenjr import modules
-from kenkenjr.modules import CustomCog, owner_only, guild_only
-from kenkenjr.modules.custom.custom_bot import Kenken
-from kenkenjr.utils import get_cog, literals, reload_literals
+import modules
+from modules import CustomCog, owner_only, guild_only
+from modules.custom.custom_bot import Kenken
+from utils import get_cog, literals, reload_literals
 
 
 class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):

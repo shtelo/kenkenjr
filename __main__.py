@@ -2,8 +2,8 @@ import sys
 
 sys.path.append('.')
 
-from kenkenjr.modules import Kenken
-from kenkenjr.utils import Log
+from modules import Kenken
+from utils import Log
 
 if __name__ == '__main__':
     Log.auto('sys.argv: ' + str(sys.argv))
