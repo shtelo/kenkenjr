@@ -42,6 +42,9 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         constant = get_constant('application')
         replies = sheet_read(constant['sheet_id'], constant['read_range'])
         self.application_keys = replies.pop(0)
+        for reply in replies:
+            if len(reply) <= DONE:
+                reply.append('')
         return replies
 
     def get_application_embed(self, data: list):
