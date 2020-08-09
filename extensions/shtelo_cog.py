@@ -15,16 +15,28 @@ NICKNAME = 4
 INVITER = 5
 KNOWLEDGE = 6
 TWITTER_ID = 7
-DONE = 13
-TRUE = ('TRUE', '네', True)
-FALSE = ('FALSE', '아니오', False, '')
+STATE = 13
 HOUR = 3600
+RECEIVED = 'RECEIVED'
+APPROVED = 'APPROVED'
+REJECTED = 'REJECTED'
 
 
 class FreshData:
     def __init__(self, data):
         self.data = data
         self.timestamp = datetime.now()
+
+
+def get_state(application: list):
+    literal = literals('get_state')
+    if application[STATE] == RECEIVED:
+        return literal['received']
+    elif application[STATE] == APPROVED:
+        return literal['approved']
+    elif application[STATE] == REJECTED:
+        return literal['rejected']
+    return ''
 
 
 class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
@@ -43,21 +55,17 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         replies = sheet_read(constant['sheet_id'], constant['read_range'])
         self.application_keys = replies.pop(0)
         for reply in replies:
-            if len(reply) <= DONE:
+            if len(reply) <= STATE:
                 reply.append('')
         return replies
 
     def get_application_embed(self, data: list):
         literal = literals('get_application_embed')
-        while len(data) < len(self.application_keys):
-            data.append('')
         discord_id = data[DISCORD_ID]
-        title = literal['title'] % discord_id
-        if data[DONE] in TRUE:
-            title += literal['done']
+        title = literal['title'] % discord_id + get_state(data)
         embeds = ChainedEmbed(title=title,
                               description=literal['description'] % (data[TIMESTAMP], data[EMAIL]))
-        if data[SUBACCOUNT] not in FALSE:
+        if data[SUBACCOUNT]:
             embeds.add_field(name=literal['subaccount'], value=literal['mainaccount'] % data[SUBACCOUNT])
         if data[NICKNAME]:
             embeds.add_field(name=literal['nickname'], value='**' + data[NICKNAME] + '**')
@@ -73,12 +81,8 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
 
     def get_application_raw_embed(self, data: list):
         literal = literals('get_application_raw_embed')
-        while len(data) < len(self.application_keys):
-            data.append('')
         discord_id = data[DISCORD_ID]
-        title = literal['title'] % discord_id
-        if data[DONE] in TRUE:
-            title += literal['done']
+        title = literal['title'] % discord_id + get_state(data)
         embeds = ChainedEmbed(title=title, description=literal['description'])
         for i in range(len(self.application_keys) - 1):
             if data[i]:
@@ -92,7 +96,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         replies = self.get_sheet()
         count = len(replies)
         for reply in replies:
-            if reply[DONE] in TRUE:
+            if reply[STATE]:
                 count -= 1
                 continue
             embeds = self.get_application_embed(reply)
@@ -119,7 +123,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         replies = self.get_sheet()
         count = len(replies)
         for reply in replies:
-            if reply[DONE] in TRUE:
+            if reply[STATE]:
                 count -= 1
                 continue
             embeds = self.get_application_raw_embed(reply)
