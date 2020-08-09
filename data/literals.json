@@ -210,7 +210,8 @@
     "subaccount": "\uD83C\uDFAB 부계정 가입",
     "mainaccount": "본계정: `%s`",
     "discord_id": "\uD83C\uDDE9 디스코드 아이디",
-    "nickname": "\uD83D\uDCDB 닉네임"
+    "nickname": "\uD83D\uDCDB 닉네임",
+    "remarks": "❓ 비고"
   },
   "get_state": {
     "received": " ✅",
