@@ -170,6 +170,9 @@
     ":bellhop:": "\uD83D\uDECE️",
     ":bar_chart:": "\uD83D\uDCCA",
     ":moneybag:": "\uD83D\uDCB0"
+    ":bar_chart:": "\uD83D\uDCCA",
+    ":ballot_box_with_check:": "☑️",
+    ":no_entry:": "⛔"
   },
   "on_command_error": {
     "command_on_cooldown": "%s 명령어를 너무 많이 사용했어! %s초 뒤에 다시 시도해줘!"
@@ -216,8 +219,12 @@
     "subaccount": "\uD83C\uDFAB 부계정 가입",
     "mainaccount": "본계정: `%s`",
     "discord_id": "\uD83C\uDDE9 디스코드 아이디",
-    "done": " ✅",
     "nickname": "\uD83D\uDCDB 닉네임"
+  },
+  "get_state": {
+    "received": " ✅",
+    "approved": " ☑️",
+    "rejected": " ⛔"
   },
   "applications": {
     "start": "새로운 가입신청서 목록을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게!",
