@@ -1,9 +1,12 @@
+import json
+
 from discord import TextChannel, Message, NotFound
 from discord.ext import commands
 from discord.ext.commands import Bot, Context, TextChannelConverter, BadArgument
 
-from modules import BotProtocol, Request, CustomCog
-from utils import get_cog, get_constant, Log
+from extensions.shtelo_cog import get_application_sheet
+from modules import BotProtocol, Request, CustomCog, doc_read
+from utils import get_cog, get_constant, Log, literals, FreshData, split_by_length
 
 
 class ProtocolCog(CustomCog, BotProtocol, name=get_cog('ProtocolCog')['name']):
@@ -14,7 +17,7 @@ class ProtocolCog(CustomCog, BotProtocol, name=get_cog('ProtocolCog')['name']):
     def __init__(self, client: Bot):
         super().__init__(client)
         self.client: Bot = client
-        self.deck: dict = {}
+        self.holding_data: dict = {}
 
     @CustomCog.listener()
     async def on_message(self, message):
@@ -26,7 +29,9 @@ class ProtocolCog(CustomCog, BotProtocol, name=get_cog('ProtocolCog')['name']):
     async def on_command_error(self, ctx: commands.Context, _):
         if ctx.guild is not None and ctx.prefix in self.client.command_prefix:
             Log.command('pass protocol request generated.')
-            await ctx.send(f'ALL PASS {ctx.prefix} {ctx.channel.mention} {ctx.message.id}', delete_after=1)
+            request = Request(receiver=BotProtocol.ALL, signal=BotProtocol.PASS,
+                              addition=f'{ctx.prefix} {ctx.channel.mention} {ctx.message.id}')
+            await ctx.send(str(request), delete_after=1)
 
     async def on_echo(self, request: Request):
         Log.command('detected.')
@@ -35,22 +40,58 @@ class ProtocolCog(CustomCog, BotProtocol, name=get_cog('ProtocolCog')['name']):
 
     async def on_pass(self, request: Request):
         Log.command('detected.')
-        tokens = request.addition.split(' ', 2)
-        if len(tokens) < 3:
+        addition = request.addition.split(' ', 2)
+        if len(addition) < 3:
             Log.error('lack of components')
             return
-        self.client.command_prefix.insert(0, tokens[0])
+        self.client.command_prefix.insert(0, addition[0])
         request_ctx = await self.client.get_context(request.message)
         try:
-            channel: TextChannel = await TextChannelConverter().convert(request_ctx, tokens[1])
-            message: Message = await channel.fetch_message(int(tokens[2]))
+            channel: TextChannel = await TextChannelConverter().convert(request_ctx, addition[1])
+            message: Message = await channel.fetch_message(int(addition[2]))
             ctx: Context = await self.client.get_context(message)
             await self.client.invoke(ctx)
         except BadArgument:
-            Log.error(f'channel {tokens[1]} not found.')
+            Log.error(f'channel {addition[1]} not found')
         except NotFound:
-            Log.error(f'message {tokens[2]} not found.')
+            Log.error(f'message {addition[2]} not found')
         self.client.command_prefix = self.client.command_prefix[-1:]
+
+    async def on_send(self, request: Request):
+        literal = literals('on_send')
+        addition = request.addition.replace(' ', '')
+
+        async def respond(data_):
+            here_request = request.generate_respond(signal=BotProtocol.HERE)
+            addition_length = 2000 - len(str(here_request))
+            here_request.addition = data_[:addition_length]
+            data_ = data_[addition_length:]
+            await request.message.channel.send(str(here_request))
+            if data_:
+                for d in split_by_length(data_):
+                    await request.message.channel.send(d)
+
+        if addition == literal['application']:
+            data = json.dumps(get_application_sheet(), ensure_ascii=False)
+            await respond(data)
+        if addition == literal['regulation']:
+            data = doc_read(get_constant('regulation')['doc_id'])
+            await respond(data)
+
+    async def on_here(self, request: Request):
+        addition = request.addition.split('', 2)
+        while len(addition) < 3:
+            Log.error('lack of components')
+            return
+        message_count = int(addition[0])
+        key = addition[1]
+        data = addition[2]
+        for _ in range(message_count - 1):
+            message = await self.client.wait_for('message', check=lambda msg: msg.author == request.message.author)
+            data += message.content
+        if key not in self.holding_data:
+            self.holding_data[key] = []
+        self.holding_data[key].append(FreshData(data))
 
 
 def setup(client: commands.Bot):

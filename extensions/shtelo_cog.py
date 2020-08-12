@@ -5,7 +5,7 @@ from discord.ext.commands import Bot, Context
 
 import modules
 from modules import CustomCog, sheet_read, ChainedEmbed, doc_read
-from utils import get_cog, literals, wrap_codeblock, get_constant
+from utils import get_cog, literals, wrap_codeblock, get_constant, FreshData
 
 TIMESTAMP = 0
 EMAIL = 1
@@ -20,13 +20,7 @@ REMARKS = 14
 HOUR = 3600
 RECEIVED = '접수됨'
 APPROVED = '승인됨'
-REJECTED = '거부됨'
-
-
-class FreshData:
-    def __init__(self, data):
-        self.data = data
-        self.timestamp = datetime.now()
+REJECTED = '기각됨'
 
 
 def get_application_sheet():
@@ -94,6 +88,15 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         self.client: Bot = client
         self.regulation: Optional[FreshData] = None  # recently loaded regulation
 
+    def fetch_regulation(self):
+        if self.regulation is None \
+                or (datetime.now() - self.regulation.timestamp).total_seconds() > HOUR:
+            paragraphs = wrap_codeblock(doc_read(get_constant('regulation')['doc_id']), split_paragraph=True)
+            self.regulation = FreshData(paragraphs)
+        else:
+            paragraphs = self.regulation.data
+        return paragraphs
+
     @modules.group(name='가입신청서', aliases=('가입', '신청서'))
     async def applications(self, ctx: Context):
         literal = literals('applications')
@@ -152,12 +155,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
     async def regulation(self, ctx: Context, *, keyword: str = ''):
         literal = literals('regulation')
         message = await ctx.send(literal['start'])
-        if self.regulation is None \
-                or (datetime.now() - self.regulation.timestamp).total_seconds() > HOUR:
-            paragraphs = wrap_codeblock(doc_read(get_constant('regulation')['doc_id']), split_paragraph=True)
-            self.regulation = FreshData(paragraphs)
-        else:
-            paragraphs = self.regulation.data
+        paragraphs = self.fetch_regulation()
         await message.edit(content=literal['done'])
         if not keyword:
             await ctx.author.send(paragraphs[0])

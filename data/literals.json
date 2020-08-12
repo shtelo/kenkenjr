@@ -338,5 +338,9 @@
   },
   "game_cog": {
     "already_playing": "%s 이미 다른 게임을 하고 있어!"
+  },
+  "on_send": {
+    "application": "application",
+    "regulation": "regulation"
   }
 }
