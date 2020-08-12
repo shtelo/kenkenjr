@@ -18,6 +18,7 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         self.client: Bot = client
         self.reactions: list = []
         self.greetings: list = []
+        self.protocol_cog = None
 
     async def after_ready(self):
         with open(get_path('reactions'), 'r', encoding='utf-8') as f:
@@ -35,12 +36,14 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
 
     @CustomCog.listener()
     async def on_message(self, message: Message):
+        if self.protocol_cog is None:
+            self.protocol_cog = self.client.get_cog(get_cog('ProtocolCog')['name'])
         ctx: commands.Context = await self.client.get_context(message)
-        if ctx.valid or message.author.id == self.client.user.id:
+        if ctx.valid or message.author.id == self.client.user.id or self.protocol_cog.get_request(message) is not None:
             return
         nick = self.client.user.display_name
         if (any(word in message.content.upper()
-                for word in ['KENKEN', '켄켄', self.client.user.mention, self.client.user.display_name, nick]) or
+                for word in ['KENKEN', '켄켄', str(self.client.user.id), self.client.user.display_name, nick]) or
                 message.content.count('켄') == 2):
             if any(word in message.content.upper() for word in self.greetings):
                 Log.command('kenkenjr greeted.')
