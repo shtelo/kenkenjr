@@ -2,7 +2,7 @@ from discord import NotFound, ClientException, Forbidden, HTTPException
 from discord.ext.commands import Context
 
 import modules
-from modules import CustomCog, owner_only, guild_only
+from modules import CustomCog, owner_only, guild_only, partner_only
 from modules.custom.custom_bot import Kenken
 from utils import get_cog, literals, reload_literals
 
@@ -22,7 +22,7 @@ class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):
         await ctx.send('테스트!')
 
     @modules.command(name='따라해', aliases=('echo',))
-    @owner_only()
+    @partner_only()
     async def echo(self, ctx: Context, *, content: str):
         await ctx.send(content)
 

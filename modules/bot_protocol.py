@@ -29,8 +29,9 @@ class BotProtocol:
     PASS = 'PASS'
     SEND = 'SEND'
     HERE = 'HERE'
+    DONE = 'DONE'
 
-    SIGNALS = (ECHO, PASS, SEND, HERE)
+    SIGNALS = (ECHO, PASS, SEND, HERE, DONE)
 
     def __init__(self, client):
         self.client: Client = client
@@ -57,6 +58,8 @@ class BotProtocol:
             await self.on_send(request)
         elif request.signal == BotProtocol.HERE:
             await self.on_here(request)
+        elif request.signal == BotProtocol.DONE:
+            await self.on_done(request)
 
     async def on_echo(self, request: Request):
         pass
@@ -68,4 +71,7 @@ class BotProtocol:
         pass
 
     async def on_here(self, request: Request):
+        pass
+
+    async def on_done(self, request: Request):
         pass
