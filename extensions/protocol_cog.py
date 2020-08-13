@@ -18,6 +18,7 @@ class ProtocolCog(CustomCog, BotProtocol, name=get_cog('ProtocolCog')['name']):
         super().__init__(client)
         self.client: Bot = client
         self.holding_data: dict = {}
+        self.done: list = []
 
     @CustomCog.listener()
     async def on_message(self, message):
@@ -59,39 +60,44 @@ class ProtocolCog(CustomCog, BotProtocol, name=get_cog('ProtocolCog')['name']):
 
     async def on_send(self, request: Request):
         literal = literals('on_send')
-        addition = request.addition.replace(' ', '')
+        key = request.addition.strip()
 
-        async def respond(data_):
-            here_request = request.generate_respond(signal=BotProtocol.HERE)
-            addition_length = 2000 - len(str(here_request))
-            here_request.addition = data_[:addition_length]
+        async def respond(data_, key_):
+            here_request = request.generate_respond(signal=BotProtocol.HERE, addition=key_ + ' ')
+            addition_length = 1999 - len(str(here_request))
+            here_request.addition += data_[:addition_length]
             data_ = data_[addition_length:]
-            await request.message.channel.send(str(here_request))
+            await request.message.channel.send(str(here_request), delete_after=1)
             if data_:
                 for d in split_by_length(data_):
-                    await request.message.channel.send(d)
+                    await request.message.channel.send(d, delete_after=1)
+            done_request = request.generate_respond(signal=BotProtocol.DONE, addition=key_)
+            await request.message.channel.send(str(done_request), delete_after=1)
 
-        if addition == literal['application']:
+        if key == literal['application']:
             data = json.dumps(get_application_sheet(), ensure_ascii=False)
-            await respond(data)
-        if addition == literal['regulation']:
+            await respond(data, key)
+        if key == literal['regulation']:
             data = doc_read(get_constant('regulation')['doc_id'])
-            await respond(data)
+            await respond(data, key)
 
     async def on_here(self, request: Request):
-        addition = request.addition.split('', 2)
-        while len(addition) < 3:
+        addition = request.addition.split(' ', 1)
+        while len(addition) < 2:
             Log.error('lack of components')
             return
-        message_count = int(addition[0])
-        key = addition[1]
-        data = addition[2]
-        for _ in range(message_count - 1):
+        key = addition[0]
+        data = addition[1]
+        while not self.done or self.done[-1].addition != key:
             message = await self.client.wait_for('message', check=lambda msg: msg.author == request.message.author)
             data += message.content
+        self.done.pop(-1)
         if key not in self.holding_data:
             self.holding_data[key] = []
         self.holding_data[key].append(FreshData(data))
+
+    async def on_done(self, request: Request):
+        self.done.append(request)
 
 
 def setup(client: commands.Bot):

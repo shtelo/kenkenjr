@@ -15,7 +15,10 @@
     "regulation": {
       "doc_id": "17rg7J1gajNO1NVhbbPgjntSVqK1rn1gwh4DwIaEz9I4"
     },
-    "extension_name": "kenkenjr.extensions.%s"
+    "extension_name": "kenkenjr.extensions.%s",
+    "kenon": "Ꝁ",
+    "elite": "ē",
+    "terro": "Ŧ"
   },
   "_path_": {
     "data": "./kenkenjr/data/",
@@ -93,6 +96,10 @@
     "ShteloCog": {
       "name": "슈텔로",
       "emoji": "⭐"
+    },
+    "EconomyCog": {
+      "name": "경제",
+      "emoji": "\uD83D\uDCB0"
     }
   },
   "_check_": {
