@@ -1,6 +1,6 @@
 from random import choice, random
 
-from discord import Message, User
+from discord import Message, User, Member
 from discord.ext import commands
 from discord.ext.commands import Context, Bot
 
@@ -67,6 +67,9 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
     @modules.command(name='프로필', aliases=('profile', '사용자', 'user'))
     @tokens_len(2)
     async def profile(self, ctx: Context, user: User):
+        member: Member = ctx.guild.get_member(user.id)
+        if member is not None:
+            user = member
         profile_embed = ChainedEmbed(title=user.display_name, color=user.colour,
                                      description=str(user))
         profile_embed.set_thumbnail(url=user.avatar_url)
