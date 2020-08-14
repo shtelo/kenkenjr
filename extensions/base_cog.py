@@ -1,10 +1,11 @@
 from random import choice, random
 
-from discord import Message
+from discord import Message, User
 from discord.ext import commands
 from discord.ext.commands import Context, Bot
 
-from modules import CustomCog, command, tokens_len
+import modules
+from modules import CustomCog, command, tokens_len, ChainedEmbed
 from utils import get_cog, get_path, Log
 
 
@@ -52,16 +53,25 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
                 Log.command('kenkenjr called.')
                 await message.channel.send(f'{choice(self.reactions)}')
 
-    @command(name='안녕', aliases=('반가워', 'ㅎㅇ', 'greet', 'hi', 'hello'))
+    @modules.command(name='안녕', aliases=('반가워', 'ㅎㅇ', 'greet', 'hi', 'hello'))
     async def greet(self, ctx: Context):
         Log.command('detected.')
         await ctx.send(self.get_greeting(ctx.message))
 
-    @command(name='핑', aliases=('ping', 'p'))
+    @modules.command(name='핑', aliases=('ping', 'p'))
     @tokens_len(1)
-    async def ping(self, ctx: commands.Context):
+    async def ping(self, ctx: Context):
         Log.command('detected.')
         await ctx.send('???')
+
+    @modules.command(name='프로필', aliases=('profile', '사용자', 'user'))
+    @tokens_len(2)
+    async def profile(self, ctx: Context, user: User):
+        profile_embed = ChainedEmbed(title=user.display_name, color=user.colour,
+                                     description=str(user))
+        profile_embed.set_thumbnail(url=user.avatar_url)
+        profile_embed.set_footer(text=str(user.created_at))
+        await ctx.send(embed=profile_embed)
 
 
 def setup(client: commands.Bot):
