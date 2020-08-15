@@ -27,7 +27,7 @@ class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):
         await ctx.send(content)
 
     @modules.command(name='삭제', aliases=('delete',))
-    @owner_only()
+    @partner_only()
     @guild_only()
     async def delete(self, ctx: Context, count: int):
         count = min(max(1, count), 100)

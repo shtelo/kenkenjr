@@ -3,11 +3,11 @@ from discord import Message, Client
 
 class Request:
     def __init__(self, message: Message = None, *, receiver: str = '', signal: str = '', addition: str = ''):
-        if message is None:  # generate manually
+        if message is None:
             self.receiver = receiver
             self.signal = signal
             self.addition = addition
-        else:  # generate from message
+        else:
             self.message: Message = message
             tokens = message.content.split(' ', 2)
             length = len(tokens)
@@ -41,7 +41,9 @@ class BotProtocol:
         if message.author.id == self.client.user.id \
                 or not message.author.bot \
                 or request.receiver is None \
-                or request.receiver not in (BotProtocol.ALL, f'<@{self.client.user.id}>', f'<@!{self.client.user.id}>')\
+                or request.receiver not in (BotProtocol.ALL,
+                                            f'<@{self.client.user.id}>',
+                                            f'<@!{self.client.user.id}>') \
                 or request.signal not in BotProtocol.SIGNALS:
             return
         return request
