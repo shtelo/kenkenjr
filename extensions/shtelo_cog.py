@@ -179,6 +179,10 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         for p in paragraphs:
             await ctx.author.send(p)
 
+    @modules.command(name='회의록')
+    async def meeting_log(self, ctx: Context):
+        await ctx.send(literals('meeting_log')['message'])
+
 
 def setup(client: Bot):
     client.add_cog(ShteloCog(client))
