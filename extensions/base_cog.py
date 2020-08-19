@@ -66,7 +66,6 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         await ctx.send('???')
 
     @modules.command(name='프로필', aliases=('profile', '사용자', 'user'))
-    @tokens_len(2)
     async def profile(self, ctx: Context, *, user: Union[Member, User]):
         profile_embed = ChainedEmbed(title=user.display_name, color=user.colour, description=str(user))
         profile_embed.set_thumbnail(url=user.avatar_url)
