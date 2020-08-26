@@ -18,10 +18,8 @@ class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):
 
     @modules.group(name='테스트', aliases=('test',))
     @owner_only()
-    async def test(self, ctx: Context, *, channel: TextChannel = None):
-        if channel is None:
-            channel = ctx.channel
-        await ctx.send('```\n'+channel.topic+'\n```')
+    async def test(self, ctx: Context):
+        await ctx.send('테스트!')
 
     @modules.command(name='따라해', aliases=('echo',))
     @partner_only()

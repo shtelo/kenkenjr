@@ -415,5 +415,8 @@
   },
   "deck_rejected": {
     "done": "%s의 데크 가입을 거절했어!"
+  },
+  "profile": {
+    "roles": "역할"
   }
 }

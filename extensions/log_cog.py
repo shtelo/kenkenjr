@@ -2,7 +2,7 @@ import traceback
 
 from discord import Message
 from discord.ext.commands import Cog, Bot, Context, CommandNotFound, CheckFailure, BadArgument, MissingRequiredArgument, \
-    DisabledCommand, CommandOnCooldown, BucketType, CommandError
+    DisabledCommand, CommandOnCooldown, BucketType, CommandError, BadUnionArgument
 
 from modules.custom.custom_cog import CustomCog
 from utils.literal import get_cog, literals
@@ -55,6 +55,9 @@ class LogCog(CustomCog, name=get_cog('LogCog')['name']):
             return
         if isinstance(error, BadArgument):
             Log.error(f'bad argument : {error}')
+            return
+        if isinstance(error, BadUnionArgument):
+            Log.error(f'bad union argument: {error}')
             return
         if isinstance(error, MissingRequiredArgument):
             Log.error(f'missing required argument : {error}')
