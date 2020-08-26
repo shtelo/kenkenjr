@@ -4,11 +4,12 @@ from typing import Optional
 
 import discord
 from discord import Member, Reaction, User
+from discord.abc import GuildChannel
 from discord.ext.commands import Bot, Context, BadArgument, check
 
 import modules
 from modules import CustomCog, sheet_read, ChainedEmbed, doc_read
-from modules.custom.check_decorator import guild_only, partner_only
+from modules.custom.check_decorator import guild_only, partner_only, owner_only
 from modules.deck import DeckHandler, DeckConverter, Deck
 from utils import get_cog, literals, wrap_codeblock, get_constant, FreshData, get_emoji
 
@@ -158,13 +159,13 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         tasks = [accept_joining_(member) for member in pending]
         if tasks:
             message = await ctx.send(literal['start'] % len(tasks))
-            done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_EXCEPTION)
+            done, yet = await asyncio.wait(tasks, return_when=asyncio.FIRST_EXCEPTION)
             for coro in done:
                 if (e := coro.exception()) is not None:
                     await self.deck_handler.fetch_deck(deck.default_channel)
                     raise e
-            await message.edit(content=literal['done'] % (' '.join([member.mention for member in pending]), deck.name))
             await self.deck_handler.save_deck(deck)
+            await message.edit(content=literal['done'] % (' '.join([member.mention for member in pending]), deck.name))
 
     @modules.group(name='가입신청서', aliases=('가입', '신청서'))
     async def applications(self, ctx: Context):
@@ -252,6 +253,11 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
     async def meeting_log(self, ctx: Context):
         await ctx.send(literals('meeting_log')['message'])
 
+    @CustomCog.listener()
+    async def on_guild_channel_update(self, before: GuildChannel, _: GuildChannel):
+        if self.deck_handler.get_deck_by_channel(before) is not None and self.deck_handler.ready:
+            await self.deck_handler.fetch_decks()
+
     @modules.group(name='데크')
     @wait_until_deck_handler_ready()
     async def deck_(self, ctx: Context, *, deck: DeckConverter = None):
@@ -298,7 +304,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         if not isinstance(author := ctx.author, Member):
             author = await self.deck_handler.guild.fetch_member(author.id)
         if deck.role in author.roles:
-            await ctx.send(literal['already'] % author.mention)
+            await ctx.send(literal['already_done'])
             return
         if deck.lock:
             await ctx.send(literal['locked'] % deck.name)
@@ -323,17 +329,17 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
             await ctx.send(literal['already_applied'])
         else:
             deck.pending.append(author)
-            tasks = [ctx.send(literal['applied'] % author.mention),
+            tasks = [ctx.send(literal['applied'] % deck.name),
                      deck.manager.send(literal['pending'] % (author.mention, deck.name, deck.id, str(author))),
                      self.deck_handler.save_deck(deck)]
             await asyncio.wait(tasks)
 
-    @deck_.command(name='승인', aliases=('가입승인',))
+    @deck_.command(name='수락', aliases=('가입승인', '가입수락', '승인'))
     @wait_until_deck_handler_ready()
     async def deck_accept(self, ctx: Context, deck: DeckConverter, member: Member, *members: Member):
         await self.accept_joining(ctx, deck, *(member,) + members)
 
-    @deck_.command(name='빠른승인')
+    @deck_.command(name='간편수락', aliases=('간편승인',))
     @guild_only()
     @wait_until_deck_handler_ready()
     async def deck_quick_accept(self, ctx: Context, *members: Member):
@@ -385,21 +391,21 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         await author.send(literal['done'] % deck.name)
 
     # TODO: code up the commands below
-    @deck_.command(name='개설', aliases=('추가',), enabled=False)
-    @wait_until_deck_handler_ready()
-    async def deck_start(self, ctx: Context):
-        pass
-
-    @deck_.command(name='폐쇄', aliases=('삭제',), enabled=False)
-    @wait_until_deck_handler_ready()
-    async def deck_end(self, ctx: Context):
-        pass
-
-    @deck_.group(name='설정', enabled=False)
-    @partner_only()
-    @wait_until_deck_handler_ready()
-    async def deck_setting(self, ctx: Context):
-        pass
+    # @deck_.command(name='개설', aliases=('추가',), enabled=False)
+    # @wait_until_deck_handler_ready()
+    # async def deck_start(self, ctx: Context):
+    #     pass
+    #
+    # @deck_.command(name='폐쇄', aliases=('삭제',), enabled=False)
+    # @wait_until_deck_handler_ready()
+    # async def deck_end(self, ctx: Context):
+    #     pass
+    #
+    # @deck_.group(name='설정', enabled=False)
+    # @partner_only()
+    # @wait_until_deck_handler_ready()
+    # async def deck_setting(self, ctx: Context):
+    #     pass
 
 
 def setup(client: Bot):
