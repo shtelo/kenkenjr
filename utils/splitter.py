@@ -2,9 +2,9 @@ def lensum(*args):
     return sum([len(arg) for arg in args])
 
 
-def wrap_codeblock(content: str, *, max_length: int = 2000, split_paragraph: bool = False):
+def wrap_codeblock(content: str, *, max_length: int = 2000, split_paragraph: bool = False, markdown: str = 'md'):
     blocks = []
-    prefix = '```md'
+    prefix = '```' + markdown
     postfix = '\n```'
     current = ''
     for line in content.split('\n'):

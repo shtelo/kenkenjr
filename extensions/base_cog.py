@@ -66,7 +66,7 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         await ctx.send('???')
 
     @modules.command(name='프로필', aliases=('profile', '사용자', 'user'))
-    async def profile(self, ctx: Context, *, user: Union[Member, User]):
+    async def profile(self, ctx: Context, *, user: Union[Member, User]):  # TODO edit 'user' argument to optional + display member roles in profile
         profile_embed = ChainedEmbed(title=user.display_name, color=user.colour, description=str(user))
         profile_embed.set_thumbnail(url=user.avatar_url)
         profile_embed.set_footer(text=str(user.created_at))

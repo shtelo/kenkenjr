@@ -1,4 +1,4 @@
-from discord import NotFound, ClientException, Forbidden, HTTPException
+from discord import NotFound, ClientException, Forbidden, HTTPException, Guild, TextChannel
 from discord.ext.commands import Context
 
 import modules
@@ -18,8 +18,10 @@ class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):
 
     @modules.group(name='테스트', aliases=('test',))
     @owner_only()
-    async def test(self, ctx: Context):
-        await ctx.send('테스트!')
+    async def test(self, ctx: Context, *, channel: TextChannel = None):
+        if channel is None:
+            channel = ctx.channel
+        await ctx.send('```\n'+channel.topic+'\n```')
 
     @modules.command(name='따라해', aliases=('echo',))
     @partner_only()

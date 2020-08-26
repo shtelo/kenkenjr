@@ -91,18 +91,15 @@ def bot_need_permissions(**permissions):
 
 def partner_only():
     async def predicate(ctx: Context):
-        partner_role = get_constant('partner_role')
-        shtelo_guild = get_constant('shtelo_guild')
-        guild = await ctx.bot.fetch_guild(shtelo_guild)
+        partner_role_id = get_constant('partner_role')
+        shtelo_guild_id = get_constant('shtelo_guild')
+        guild = await ctx.bot.fetch_guild(shtelo_guild_id)
         member = None
         if guild is not None:
             member = await guild.fetch_member(ctx.author.id)
         if member is None:
             return False
-        if isinstance(partner_role, int):
-            role = discord.utils.get(member.roles, id=partner_role)
-        else:
-            role = discord.utils.get(member.roles, name=partner_role)
+        role = discord.utils.get(member.roles, id=partner_role_id)
         if role is None:
             return False
         return True

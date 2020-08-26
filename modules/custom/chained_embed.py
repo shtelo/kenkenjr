@@ -7,9 +7,10 @@ from discord.embeds import EmptyEmbed
 class ChainedEmbed(Embed):
     MAX_LEN = 6000
     MAX_FIELD = 25
-    DEFAULT_COLOR = Colour.green()
+    KENKEN_CYAN = Colour.from_rgb(130, 195, 195)
+    SHTELO_YELLOW = Colour.from_rgb(253, 222, 89)
 
-    def __init__(self, *, depth: int = 0, color: Colour = DEFAULT_COLOR, **kwargs):
+    def __init__(self, *, depth: int = 0, color: Colour = KENKEN_CYAN, **kwargs):
         super().__init__(color=color, **kwargs)
         self.depth: int = depth
         self.color: Colour = color

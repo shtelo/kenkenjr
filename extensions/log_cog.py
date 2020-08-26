@@ -2,7 +2,7 @@ import traceback
 
 from discord import Message
 from discord.ext.commands import Cog, Bot, Context, CommandNotFound, CheckFailure, BadArgument, MissingRequiredArgument, \
-    DisabledCommand, CommandOnCooldown, BucketType
+    DisabledCommand, CommandOnCooldown, BucketType, CommandError
 
 from modules.custom.custom_cog import CustomCog
 from utils.literal import get_cog, literals

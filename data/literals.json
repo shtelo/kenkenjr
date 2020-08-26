@@ -6,6 +6,8 @@
     "kenken_id": 732567336606892072,
     "partner_role": 650591166370414599,
     "representative_role": 650534577605181456,
+    "manager_role": 650534578880118820,
+    "member_role": 650534579291291659,
     "shtelo_guild": 650533223520010261,
     "application": {
       "sheet_id": "1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA",
@@ -172,7 +174,14 @@
     ":bellhop:": "\uD83D\uDECE️",
     ":bar_chart:": "\uD83D\uDCCA",
     ":ballot_box_with_check:": "☑️",
-    ":no_entry:": "⛔"
+    ":no_entry:": "⛔",
+    ":medal:": "\uD83C\uDFC5",
+    ":family_woman_girl_girl:": "\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC67",
+    ":page_facing_up:": "\uD83D\uDCC4",
+    ":underage:": "\uD83D\uDD1E",
+    ":raised_hand:": "✋",
+    ":negative_squared_cross_mark:": "❎",
+    ":lock:": "\uD83D\uDD12"
   },
   "on_command_error": {
     "command_on_cooldown": "%s 명령어를 너무 많이 사용했어! %s초 뒤에 다시 시도해줘!"
@@ -250,7 +259,7 @@
   "get_application_raw_embed": {
     "done": " ✅",
     "title": "__%s__의 가입신청서",
-    "description": "가입 신청서 원본 양식입니다."
+    "description": "가입신청서 원본 양식입니다."
   },
   "regulation": {
     "start": "슈텔로 회칙을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게!",
@@ -354,5 +363,56 @@
   },
   "meeting_log":{
     "message": "회의록 색인 문서야!\n> https://docs.google.com/document/d/15rRzrvpSjmhn26vdcdMsygiarGaarTdOqXsHSyEGE5U"
+  },
+  "wait_until_deck_handler_ready.predicate": {
+    "start": "데크 정보를 확인하고 있어..."
+  },
+  "deck_refresh": {
+    "start": "데크 정보를 동기화하고 있어...",
+    "done": "데크 정보가 갱신됐어!"
+  },
+  "deck_list": {
+    "title": "\uD83D\uDCC4 데크 목록"
+  },
+  "get_deck_embed": {
+    "title": "__%s__ 데크",
+    "manager": "\uD83C\uDFC5 매니저",
+    "members": "\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC67 멤버(총원 %s명)",
+    "id": "id: %s",
+    "public_name": "✅ 공식 데크",
+    "public_value": "이 데크는 파트너단에 의해 운영되는 데크입니다.",
+    "nsfw_name": "\uD83D\uDD1E 민감한 주제",
+    "nsfw_value": "이 데크는 [슈텔로 회칙 예절항](https://docs.google.com/document/d/17rg7J1gajNO1NVhbbPgjntSVqK1rn1gwh4DwIaEz9I4/edit#heading=h.fj1fdx14p3db)에서 정의된 __민감한 주제__에 대해 언급하는 것이 허가되어 있습니다.",
+    "auto_name": "\uD83E\uDD16 자동 승인",
+    "auto_value": "이 데크는 가입신청을 자동으로 승인합니다.",
+    "lock_name": "\uD83D\uDD12 잠긴 데크",
+    "lock_value": "이 데크에는 가입신청을 전송할 수 없습니다.",
+    "pending": "✋ 보류된 %s개의 가입신청"
+  },
+  "deck_join": {
+    "already_done": "이미 이 데크에 가입돼있어!",
+    "done": "**%s** 데크에 가입했어!",
+    "already_applied": "이미 이 데크에 가입신청을 했어!",
+    "applied": "가입신청이 **%s** 데크의 매니저에게 전달됐어! 매니저가 승인해주면 가입할 수 있을 거야!",
+    "pending": "%s의 **%s** 데크 가입신청이 접수됐어! \n가입을 승인하려면 `<P>데크 승인 %s %s` 이렇게 해봐!",
+    "locked": "**%s** 데크는 잠겨있어서 가입할 수 없어!",
+    "warn": "***위험해!!!***\n**%s**는 __민감한 주제__를 언급할 수 있는 데크래! (뭔 일인지 궁금하면 `<P>회칙 예절` 이렇게 해봐!)\n\n들어가면 충격을 받을 지도 몰라... 근데 책임은 자기가 지는거라 들어가고 싶으면 들어가고 싶으면 들어가도 되나봐...?\n\n**들어가려면 아래 :underage: 반응을 눌러!** 1분 남았다!!! %s"
+  },
+  "deck_leave": {
+    "already": "이 데크에 가입하지 않았어!",
+    "failed": "탈퇴하려는 데크가 어디인지 명령어 뒤에 적어야 해... `<P>데크 탈퇴 devs` 이렇게!",
+    "done": "**%s** 데크에서 탈퇴했어!",
+    "disabled": "데크 매니저는 데크를 탈퇴할 수 없어... 매니저를 위임하려면 `<P>데크 위임 %s @멤버` 이렇게 해봐!",
+    "cancelled": "**%s** 데크의 가입신청을 취소했어!"
+  },
+  "accept_joining": {
+    "start": "%s명의 가입을 승인하고 있어...",
+    "done": "%s의 **%s** 데크 가입을 승인했어!"
+  },
+  "deck_quick_accept": {
+    "failed": "이 명령어는 데크 내의 채널에서만 사용할 수 있어!"
+  },
+  "deck_rejected": {
+    "done": "%s의 데크 가입을 거절했어!"
   }
 }
