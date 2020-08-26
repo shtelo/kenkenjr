@@ -3,11 +3,11 @@ from typing import Union
 
 from discord import Message, User, Member
 from discord.ext import commands
-from discord.ext.commands import Context, Bot
+from discord.ext.commands import Context, Bot, MemberConverter, BadArgument
 
 import modules
 from modules import CustomCog, tokens_len, ChainedEmbed
-from utils import get_cog, get_path, Log
+from utils import get_cog, get_path, Log, literals
 
 
 class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
@@ -66,10 +66,22 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         await ctx.send('???')
 
     @modules.command(name='프로필', aliases=('profile', '사용자', 'user'))
-    async def profile(self, ctx: Context, *, user: Union[Member, User]):  # TODO edit 'user' argument to optional + display member roles in profile
-        profile_embed = ChainedEmbed(title=user.display_name, color=user.colour, description=str(user))
+    async def profile(self, ctx: Context, *, user: Union[Member, User] = None):
+        literal = literals('profile')
+        if user is None:
+            user = ctx.author
+            try:
+                user = await MemberConverter().convert(ctx, str(user.id))
+            except BadArgument:
+                pass
+        profile_embed = ChainedEmbed(title=user.display_name, color=user.colour, description='@' + str(user))
         profile_embed.set_thumbnail(url=user.avatar_url)
         profile_embed.set_footer(text=str(user.created_at))
+        if isinstance(user, Member):
+            profile_embed.set_author(name=user.guild.name + ' ' + user.top_role.name, icon_url=user.guild.icon_url)
+            if user.roles[1:]:
+                profile_embed.add_field(name=literal['roles'],
+                                        value='\n'.join([role.name for role in user.roles[1:]]))
         await ctx.send(embed=profile_embed)
 
 
