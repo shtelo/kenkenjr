@@ -1,3 +1,4 @@
+import math
 import traceback
 
 from discord import Message
@@ -67,9 +68,7 @@ class LogCog(CustomCog, name=get_cog('LogCog')['name']):
             return
         if isinstance(error, CommandOnCooldown):
             Log.error(f'command now on cooldown, {error.retry_after}s left.')
-            if error.cooldown.type == BucketType.user:
-                await ctx.send(literals('on_command_error')['command_on_cooldown'] %
-                               (ctx.author.mention, int(error.retry_after)))
+            await ctx.send(literals('LogCog.on_command_error')['cooldown'] % math.ceil(error.retry_after))
             return
         Log.error(str(error) + '\n'
                   + ("".join(traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__))))

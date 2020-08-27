@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from re import match, findall, sub
+from re import match, sub
 
 import discord
 from discord import Guild, Client, TextChannel, CategoryChannel, VoiceChannel, Member, Role
@@ -26,6 +26,8 @@ class Deck:
     MANAGER = '매니저'
     PENDING = '가입신청자'
 
+    TOPIC_MAX_LENGTH = 512
+
     def __init__(self, **kwargs):
         self.public: bool = self.PUBLIC_EMOJI in kwargs.get('settings')
         self.nsfw: bool = self.NSFW_EMOJI in kwargs.get('settings')
@@ -35,7 +37,7 @@ class Deck:
         self.manager: Member = kwargs.get('manager')
         self.pending: list = kwargs.get('pending')
         self.name: str = kwargs.get('name')
-        self.topic: str = kwargs.get('topic')
+        self.topic: str = kwargs.get('topic')[:self.TOPIC_MAX_LENGTH]
         self.category_channel: CategoryChannel = kwargs.get('category_channel')
         self.default_channel: TextChannel = kwargs.get('default_channel')
         self.role: Role = kwargs.get('role')

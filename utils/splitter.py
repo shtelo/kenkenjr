@@ -7,6 +7,8 @@ def wrap_codeblock(content: str, *, max_length: int = 2000, split_paragraph: boo
     prefix = '```' + markdown
     postfix = '\n```'
     current = ''
+    if not content:
+        return [prefix + '​' + postfix]
     for line in content.split('\n'):
         if lensum(prefix, postfix, current, line) > max_length or (split_paragraph and not line.strip()):
             if current.strip():

@@ -5,7 +5,7 @@ from typing import Optional
 import discord
 from discord import Member, Reaction, User
 from discord.abc import GuildChannel
-from discord.ext.commands import Bot, Context, BadArgument, check
+from discord.ext.commands import Bot, Context, BadArgument, check, cooldown, BucketType
 
 import modules
 from modules import CustomCog, sheet_read, ChainedEmbed, doc_read
@@ -128,6 +128,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         async for member in self.deck_handler.guild.fetch_members():
             if deck_role in member.roles:
                 deck_members.append('@' + str(member))
+        deck_embed.set_thumbnail(url=deck.manager.avatar_url)
         deck_embed.add_field(name=literal['manager'], value='@' + str(deck.manager))
         if deck.public:
             deck_embed.add_field(name=literal['public_name'], value=literal['public_value'])
@@ -166,6 +167,17 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
                     raise e
             await self.deck_handler.save_deck(deck)
             await message.edit(content=literal['done'] % (' '.join([member.mention for member in pending]), deck.name))
+
+    async def edit_deck_topic(self, ctx: Context, deck: Deck, new_topic: str):
+        literal = literals('edit_deck_topic')
+        old_topic = wrap_codeblock(deck.topic, markdown='')[0]
+        deck.topic = new_topic
+        topic_embed = await self.get_deck_embed(deck)
+        topic_embed.clear_fields()
+        topic_embed.add_field(name=literal['before'], value=old_topic)
+        message = await ctx.send(literal['start'], embed=topic_embed)
+        await self.deck_handler.save_deck(deck)
+        await message.edit(content=literal['done'] % ctx.author.mention)
 
     @modules.group(name='가입신청서', aliases=('가입', '신청서'))
     async def applications(self, ctx: Context):
@@ -294,6 +306,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         list_embeds = ChainedEmbed(title=literal['title'],
                                    description='\n'.join([deck.get_brief()
                                                           for deck in self.deck_handler.decks.values()]))
+        list_embeds.set_thumbnail(url=self.client.user.avatar_url)
         for embed in list_embeds.to_list():
             await ctx.send(embed=embed)
 
@@ -389,6 +402,29 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
             return
         await author.remove_roles(deck.role)
         await author.send(literal['done'] % deck.name)
+
+    @deck_.group(name='주제', aliases=('설명',))
+    @cooldown(rate=1, per=30, type=BucketType.channel)
+    @wait_until_deck_handler_ready()
+    async def deck_topic(self, ctx: Context, *, new_topic: str):
+        if not new_topic:
+            await self.deck_info(ctx)
+            return
+        deck = await DeckConverter().convert(ctx, str(ctx.channel.id))
+        if ctx.author.id != deck.manager.id:
+            raise BadArgument(f'"{ctx.author}" is not a manager of deck {deck.name}')
+        if len(new_topic) > Deck.TOPIC_MAX_LENGTH:
+            raise BadArgument(f'topic length overs {Deck.TOPIC_MAX_LENGTH}')
+        await self.edit_deck_topic(ctx, deck, new_topic)
+
+    @deck_topic.command(name='삭제', aliases=('제거',))
+    @cooldown(rate=1, per=30, type=BucketType.channel)
+    @wait_until_deck_handler_ready()
+    async def deck_topic_remove(self, ctx: Context):
+        deck = await DeckConverter().convert(ctx, str(ctx.channel.id))
+        if ctx.author.id != deck.manager.id:
+            raise BadArgument(f'"{ctx.author}" is not a manager of deck {deck.name}')
+        await self.edit_deck_topic(ctx, deck, '')
 
     # TODO: code up the commands below
     # @deck_.command(name='개설', aliases=('추가',), enabled=False)
