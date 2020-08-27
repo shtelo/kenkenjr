@@ -68,7 +68,7 @@ class Yacht(Game):
     def reroll_all(self, dice_id: list = None) -> Optional[List[int]]:
         if dice_id is None:
             dice_id = DICE_ID
-        failed = []
+        failed = list()
         for d in dice_id:
             if d in self.dice.keys():
                 self.dice[d] = Yacht.roll_dice()
@@ -195,7 +195,7 @@ class Yacht(Game):
             return user_ == self.player and reaction_.message.id == message.id \
                    and (str(reaction_) in (REROLL_EMOJI, CONFIRM_EMOJI) or str(reaction_) in DICE_ID)
 
-        selected = []
+        selected = list()
         last_emoji = ''
         while not (selected and last_emoji == REROLL_EMOJI) and not (last_emoji == CONFIRM_EMOJI):
             reaction, _, added = await self.wait_for_reaction_change(is_dice_reaction)
@@ -206,7 +206,7 @@ class Yacht(Game):
                 elif last_emoji in selected:
                     selected.remove(last_emoji)
         asyncio.create_task(message.delete(delay=1))
-        return selected if last_emoji == REROLL_EMOJI else []
+        return selected if last_emoji == REROLL_EMOJI else list()
 
     async def get_category_reaction(self, message: Message):
         selectable_categories = [item[0][1] for item in self.scores.items() if item[1] == -1]
@@ -216,7 +216,7 @@ class Yacht(Game):
             return user_ == self.player and reaction_.message.id == message.id \
                    and str(reaction_) in selectable_categories + [CONFIRM_EMOJI]
 
-        selected = []
+        selected = list()
         while True:
             reaction, _, added = await self.wait_for_reaction_change(is_category_reaction)
             if str(reaction) == CONFIRM_EMOJI:

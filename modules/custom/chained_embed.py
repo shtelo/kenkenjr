@@ -31,7 +31,7 @@ class ChainedEmbed(Embed):
             self.next.set_footer(text=text, icon_url=icon_url)
 
     def to_list(self):
-        embed_list = []
+        embed_list = list()
         embed = self
         while embed is not None:
             embed_list.append(embed)

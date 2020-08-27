@@ -7,7 +7,7 @@ from discord import User
 
 
 class Game(ABC):
-    _instances: list = []
+    _instances: list = list()
 
     def __init__(self, *players: User):
         Game._instances.append(self)

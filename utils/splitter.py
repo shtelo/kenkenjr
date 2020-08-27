@@ -3,7 +3,7 @@ def lensum(*args):
 
 
 def wrap_codeblock(content: str, *, max_length: int = 2000, split_paragraph: bool = False, markdown: str = 'md'):
-    blocks = []
+    blocks = list()
     prefix = '```' + markdown
     postfix = '\n```'
     current = ''

@@ -11,7 +11,7 @@ from utils import get_path
 SCOPES = 'https://www.googleapis.com/auth/documents.readonly'
 DISCOVERY_DOC = 'https://docs.googleapis.com/$discovery/rest?version=v1'
 
-list_order = {}
+list_order = dict()
 
 
 def get_prefix_of(list_id, nested):

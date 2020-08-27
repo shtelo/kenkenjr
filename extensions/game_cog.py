@@ -25,7 +25,7 @@ class GameCog(CustomCog, name=get_cog('GameCog')['name']):
     async def king(self, ctx: Context, player1: Member, player2: Member, player3: Member, *players: Member):
         players = list(players)
         players.extend((player1, player2, player3))
-        tasks = []
+        tasks = list()
         king = None
         i = 0
         count_description = literals('king')['count'] % (len(players) - 1)

@@ -124,7 +124,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         literal = literals('get_deck_embed')
         deck_embed = ChainedEmbed(title=literal['title'] % deck.name, description=deck.topic)
         deck_role = discord.utils.get(await self.deck_handler.guild.fetch_roles(), name=deck.name)
-        deck_members = []
+        deck_members = list()
         async for member in self.deck_handler.guild.fetch_members():
             if deck_role in member.roles:
                 deck_members.append('@' + str(member))

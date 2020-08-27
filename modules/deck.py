@@ -96,44 +96,44 @@ class DeckHandler:
         self.guild: Guild = None
         self.decks: dict = None
         self.ready: bool = False
-        client.loop.create_task(self.__fetch_all__())
+        client.loop.create_task(self._fetch_all())
 
-    async def __fetch_all__(self):
+    async def _fetch_all(self):
         await self.client.wait_until_ready()
-        await self.__fetch_guild__()
-        await self.__fetch_decks__()
+        await self._fetch_guild()
+        await self._fetch_decks()
         self.ready = True
 
     async def wait_until_ready(self):
         while not self.ready:
             await asyncio.sleep(0.1)
 
-    async def __fetch_guild__(self):
+    async def _fetch_guild(self):
         self.guild = await self.client.fetch_guild(self.SHTELO_ID)
 
     async def fetch_decks(self):
         self.ready = False
-        await self.__fetch_decks__()
+        await self._fetch_decks()
         self.ready = True
 
-    async def __fetch_decks__(self):
-        self.decks = {}  # TODO change all '{}' and '[]' to 'dict()' and 'list()'!
-        tasks = []
+    async def _fetch_decks(self):
+        self.decks = dict()
+        tasks = list()
         for channel in await self.guild.fetch_channels():
             if isinstance(channel, TextChannel) \
                     and channel.category_id is not None \
                     and channel.topic is not None \
                     and match(self.ENTIRE_REGEX, channel.topic) is not None:
-                tasks.append(self.__fetch_deck__(channel))
+                tasks.append(self._fetch_deck(channel))
         if tasks:
             await asyncio.wait(tasks)
 
     async def fetch_deck(self, default_channel: TextChannel):
         self.ready = False
-        await self.__fetch_deck__(default_channel)
+        await self._fetch_deck(default_channel)
         self.ready = True
 
-    async def __fetch_deck__(self, default_channel: TextChannel):
+    async def _fetch_deck(self, default_channel: TextChannel):
         if (category_id := default_channel.category_id) in self.decks:
             del self.decks[category_id]
         category_channel = await self.client.fetch_channel(category_id)

@@ -34,7 +34,7 @@ def get_service():
 def sheet_read(spreadsheet_id, range_name):
     sheet = get_service().spreadsheets()
     result = sheet.values().get(spreadsheetId=spreadsheet_id, range=range_name).execute()
-    values = result.get('values', [])
+    values = result.get('values', list())
     return values
 
 

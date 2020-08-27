@@ -16,7 +16,7 @@ class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):
         super().__init__(client)
         self.client: Kenken = client
 
-    @modules.group(name='테스트', aliases=('test',))
+    @modules.group(name='테스트', aliases=tuple('test',))
     @owner_only()
     async def test(self, ctx: Context):
         await ctx.send('테스트!')

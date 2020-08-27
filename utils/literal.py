@@ -55,7 +55,7 @@ class Literal:
     PREFIX = '<P>'
 
     def __init__(self):
-        self.literals: dict = {}
+        self.literals: dict = dict()
         self.load()
         self.format_all(self.literals)
 

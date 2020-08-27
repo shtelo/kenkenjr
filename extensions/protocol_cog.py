@@ -17,8 +17,8 @@ class ProtocolCog(CustomCog, BotProtocol, name=get_cog('ProtocolCog')['name']):
     def __init__(self, client: Bot):
         super().__init__(client)
         self.client: Bot = client
-        self.holding_data: dict = {}
-        self.done: list = []
+        self.holding_data: dict = dict()
+        self.done: list = list()
 
     @CustomCog.listener()
     async def on_message(self, message):
@@ -93,7 +93,7 @@ class ProtocolCog(CustomCog, BotProtocol, name=get_cog('ProtocolCog')['name']):
             data += message.content
         self.done.pop(-1)
         if key not in self.holding_data:
-            self.holding_data[key] = []
+            self.holding_data[key] = list()
         self.holding_data[key].append(FreshData(data))
 
     async def on_done(self, request: Request):

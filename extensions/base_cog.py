@@ -18,8 +18,8 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
     def __init__(self, client: Bot):
         super().__init__(client)
         self.client: Bot = client
-        self.reactions: list = []
-        self.greetings: list = []
+        self.reactions: list = list()
+        self.greetings: list = list()
         self.protocol_cog = None
 
     async def after_ready(self):
