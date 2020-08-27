@@ -335,6 +335,8 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
                 await asyncio.wait([message.clear_reactions(),
                                     message.add_reaction(get_emoji(':negative_squared_cross_mark:'))])
                 return
+            finally:
+                await message.delete()
         if deck.auto:
             tasks = [ctx.send(literal['done'] % deck.name), author.add_roles(deck.role)]
             await asyncio.wait(tasks)
