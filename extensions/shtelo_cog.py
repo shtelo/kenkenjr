@@ -58,7 +58,7 @@ def get_application_embed(data: list):
     title = literal['title'] % discord_id + state_of_application(data)
     embeds = ChainedEmbed(title=title,
                           description=literal['description'] % (data[TIMESTAMP], data[EMAIL]))
-    if data[SUBACCOUNT]:
+    if data[SUBACCOUNT] != literal['false']:
         embeds.add_field(name=literal['subaccount'], value=literal['mainaccount'] % data[SUBACCOUNT])
     if data[NICKNAME]:
         embeds.add_field(name=literal['nickname'], value='**' + data[NICKNAME] + '**')
