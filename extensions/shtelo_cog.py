@@ -280,7 +280,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         else:
             await self.deck_info(ctx, deck=deck)
 
-    @deck_.command(name='갱신', aliases=('동기화', '리로드', '초기화', '로드', '새로고침'))
+    @deck_.command(name='갱신', aliases=('동기화', '초기화', '새로고침'))
     async def deck_refresh(self, ctx: Context):
         literal = literals('deck_refresh')
         message = await ctx.send(literal['start'])
