@@ -27,6 +27,7 @@ class Deck:
     PENDING = '가입신청자'
 
     TOPIC_MAX_LENGTH = 512
+    NAME_MAX_LENGTH = 64
 
     def __init__(self, **kwargs):
         self.public: bool = self.PUBLIC_EMOJI in kwargs.get('settings')
@@ -62,7 +63,7 @@ class Deck:
         deck_str += '\n' + self.MANAGER + ': ' + self.manager.mention
         deck_str += ('\n' + self.PENDING + ': ' + '\n'.join([member.mention for member in self.pending])
                      if self.pending else '')
-        deck_str += '\n\n' + self.topic
+        deck_str += '\n\n' + self.topic[:self.TOPIC_MAX_LENGTH]
         return deck_str
 
     def get_brief(self):
@@ -90,6 +91,8 @@ class DeckHandler:
     TOPIC_REGEX = '(.|\\n)+'
     ENTIRE_REGEX = '^{0}(\\n{1})?\\n{2}(\\n{3})?(\\n{4})?$' \
         .format(ID_REGEX, SETTING_REGEX, MANAGER_REGEX, PENDING_REGEX, TOPIC_REGEX)
+
+    VALID_ID_REGEX = '^[0123456789_acdefghijkmnprstvwxyzACEFGHJKLMNPRTVWXY]{4}$'
 
     def __init__(self, client: Client):
         self.client: Client = client
@@ -188,6 +191,9 @@ class DeckHandler:
     def find_decks_by_topic(self, keyword: str):
         decks = [deck for deck in self.decks.values() if keyword in deck.topic]
         return decks
+
+    def is_valid_id(self, id_: str):
+        return match(self.VALID_ID_REGEX, id_) is not None
 
 
 class DeckConverter(Converter):

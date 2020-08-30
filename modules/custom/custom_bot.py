@@ -2,7 +2,8 @@ from asyncio import get_event_loop
 from os import listdir
 
 from decouple import config
-from discord.ext.commands import Bot, ExtensionAlreadyLoaded, ExtensionFailed, NoEntryPointError, ExtensionError
+from discord.ext.commands import ExtensionAlreadyLoaded, ExtensionFailed, NoEntryPointError, ExtensionError
+from discord.ext.commands.bot import Bot
 
 from utils import get_path, get_constant, Log, singleton
 
@@ -45,3 +46,6 @@ class Kenken(Bot):
         for extension in self.extensions.keys():
             done = done and self.reload_extension(extension)
         return done
+
+    def group(self, *args, **kwargs):
+        pass

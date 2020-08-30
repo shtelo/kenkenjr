@@ -1,6 +1,11 @@
+# important data
 data/google_api/
-data/logs/
 .env
+
+# inimportant data
 *.pyc
 __pycache__/
 .idea/
+venv/
+dummy/
+data/logs/

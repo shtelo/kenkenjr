@@ -1,4 +1,4 @@
-from discord import NotFound, ClientException, Forbidden, HTTPException, Guild, TextChannel
+from discord import NotFound, ClientException, Forbidden, HTTPException
 from discord.ext.commands import Context
 
 import modules

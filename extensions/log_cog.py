@@ -2,8 +2,8 @@ import math
 import traceback
 
 from discord import Message
-from discord.ext.commands import Cog, Bot, Context, CommandNotFound, CheckFailure, BadArgument, MissingRequiredArgument, \
-    DisabledCommand, CommandOnCooldown, BucketType, CommandError, BadUnionArgument
+from discord.ext.commands import Bot, Context, CommandNotFound, CheckFailure, MissingRequiredArgument, \
+    DisabledCommand, CommandOnCooldown, BadUnionArgument
 
 from modules.custom.custom_cog import CustomCog
 from utils.literal import get_cog, literals
@@ -48,15 +48,21 @@ class LogCog(CustomCog, name=get_cog('LogCog')['name']):
 
     @CustomCog.listener()
     async def on_command_error(self, ctx: Context, error: Exception):
+        if isinstance(error, CommandOnCooldown):
+            Log.error(f'command now on cooldown, {error.retry_after}s left.')
+            await ctx.send(literals('LogCog.on_command_error')['cooldown'] % math.ceil(error.retry_after))
+            return
+        elif ctx.command is not None:
+            ctx.command.reset_cooldown(ctx)
         if isinstance(error, CommandNotFound):
             Log.error(f'not command : {error}')
             return
         if isinstance(error, CheckFailure):
             Log.error(f'check failed : {error}')
             return
-        if isinstance(error, BadArgument):
-            Log.error(f'bad argument : {error}')
-            return
+        # if isinstance(error, BadArgument):
+        #     Log.error(f'bad argument : {error}')
+        #     return
         if isinstance(error, BadUnionArgument):
             Log.error(f'bad union argument: {error}')
             return
@@ -65,10 +71,6 @@ class LogCog(CustomCog, name=get_cog('LogCog')['name']):
             return
         if isinstance(error, DisabledCommand):
             Log.error(f'disabled command : {error}')
-            return
-        if isinstance(error, CommandOnCooldown):
-            Log.error(f'command now on cooldown, {error.retry_after}s left.')
-            await ctx.send(literals('LogCog.on_command_error')['cooldown'] % math.ceil(error.retry_after))
             return
         Log.error(str(error) + '\n'
                   + ("".join(traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__))))
