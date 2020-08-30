@@ -7,5 +7,5 @@ data/google_api/
 __pycache__/
 .idea/
 venv/
-dummy/
 data/logs/
+dummy/
