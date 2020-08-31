@@ -1,10 +1,14 @@
+import asyncio
 from typing import List
 
-from discord.ext.commands import Context, Cog, Group, Command, Bot
+from discord import Reaction, User
+from discord.ext.commands import Context, Cog, Command, Bot
 
 import modules
-from modules import CustomCog, ChainedEmbed
-from utils import get_cog, get_constant, literals, get_check
+from modules import CustomCog, ChainedEmbed, CustomGroup
+from utils import get_cog, get_constant, literals, get_check, get_emoji
+
+COMMANDS_TIMEOUT = 10
 
 
 def brief_cog(cog: Cog):
@@ -15,18 +19,18 @@ def brief_cog(cog: Cog):
         brief = ''
     if not cog.get_commands():
         return brief
-    brief += '```\n'
+    brief += '\n'
     for command in cog.get_commands():
         brief += brief_command(command) + '\n'
-    return brief + '\n```'
+    return brief
 
 
-def brief_group(group: Group):
-    brief = '`' + group.qualified_name + '`'
+def brief_group(group: CustomGroup):
+    brief = '\\* `' + group.qualified_name + '`'
     if group.brief is not None:
         brief += ': ' + group.brief
     for command in group.commands:
-        if isinstance(command, Group):
+        if isinstance(command, CustomGroup):
             brief += '\n' + brief_group(command)
         else:
             brief += '\n' + brief_command(command)
@@ -34,9 +38,9 @@ def brief_group(group: Group):
 
 
 def brief_command(command: Command):
-    if isinstance(command, Group):
+    if isinstance(command, CustomGroup):
         return brief_group(command)
-    brief = '`' + command.qualified_name + '`'
+    brief = '\\* `' + command.qualified_name + '`'
     if command.brief is not None:
         brief += ': ' + command.brief
     return brief
@@ -73,7 +77,7 @@ def check_correlation(command: Command, keywords: List[str], embed: ChainedEmbed
             embed.add_field(name=command.qualified_name, value=command_info)
             found += 1
         break
-    if isinstance(command, Group):
+    if isinstance(command, CustomGroup):
         for subcommand in command.commands:
             found += check_correlation(subcommand, keywords, embed)
     return found
@@ -90,16 +94,17 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
 
     @modules.command(name='검색', aliases=('찾기', 'search', 's'))
     async def search(self, ctx: Context, keyword: str, *keywords: str):
+        literal = literals('search')
         keywords = list(keywords)
         keywords.append(keyword)
-        description = literals('search')['found']
-        embeds = ChainedEmbed(title=literals('search')['title'], description=description)
+        description = literal['found']
+        embeds = ChainedEmbed(title=literal['title'], description=description)
         embeds.set_thumbnail(url=self.client.user.avatar_url)
         found = 0
         for command in self.client.commands:
             check_correlation(command, keywords, embeds)
         embeds.description = description % (found, ', '.join(keywords)) if found \
-            else literals('search')['not_found'] % ', '.join(keywords)
+            else literal['not_found'] % ', '.join(keywords)
         for embed in embeds.to_list():
             await ctx.send(embed=embed)
 
@@ -133,16 +138,52 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
             await ctx.send(embed=embed)
 
     async def send_cog_list(self, ctx: Context):
-        embeds = ChainedEmbed(title=literals('send_cog_list')['title'],
-                              description=literals('send_cog_list')['description'])
-        embeds.set_thumbnail(url=self.client.user.avatar_url)
+        literal = literals('send_cog_list')
+        embed = ChainedEmbed(title=literal['title'],
+                             description=literal['description'])
+        embed.set_thumbnail(url=self.client.user.avatar_url)
+        pages = list()
+        page = 0
         for cog_name, cog in self.client.cogs.items():
             name = cog_name
             if isinstance(cog, CustomCog):
                 name = cog.emoji + ' ' + name
-            embeds.add_field(name=name, value=brief_cog(cog))
-        for embed in embeds.to_list():
-            await ctx.send(embed=embed)
+            pages.append((name, brief_cog(cog)))
+        embed.add_field(name=pages[page][0], value=pages[page][1])
+        embed.set_footer(text=literal['footer'] % (page + 1, len(pages)))
+        message = await ctx.send(embed=embed)
+        prev_emoji = get_emoji(':arrow_left:')
+        next_emoji = get_emoji(':arrow_right:')
+        done_emoji = get_emoji(':white_check_mark:')
+        emojis = (prev_emoji, next_emoji, done_emoji)
+        await message.add_reaction(prev_emoji)
+        await message.add_reaction(done_emoji)
+        await message.add_reaction(next_emoji)
+
+        def is_reaction(reaction_: Reaction, user_: User):
+            return reaction_.message.id == message.id and user_.id == ctx.author.id and reaction_.emoji in emojis
+
+        while True:
+            try:
+                reaction, user = await self.client.wait_for('reaction_add', check=is_reaction, timeout=COMMANDS_TIMEOUT)
+                if reaction.emoji == done_emoji:
+                    break
+                else:
+                    embed.clear_fields()
+                    if reaction.emoji == prev_emoji:
+                        page = (page - 1) % len(pages)
+                    elif reaction.emoji == next_emoji:
+                        page = (page + 1) % len(pages)
+                    embed.add_field(name=pages[page][0], value=pages[page][1])
+                    embed.set_footer(text=literal['footer'] % (page + 1, len(pages)))
+                    await message.edit(embed=embed)
+            except asyncio.TimeoutError:
+                break
+            finally:
+                await asyncio.wait([message.remove_reaction(prev_emoji, ctx.author),
+                                    message.remove_reaction(next_emoji, ctx.author)])
+        await asyncio.wait([message.clear_reaction(prev_emoji),
+                            message.clear_reaction(next_emoji)])
 
     async def send_command_help(self, ctx: Context, command: Command):
         command_name = command.qualified_name
@@ -153,9 +194,9 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
         elif command.brief is not None:
             description = command.brief + '\n'
         description += f'`{signature}`'
-        embeds = ChainedEmbed(title=command_name, description=description)
+        embeds = ChainedEmbed(title=get_constant('default_prefix') + command_name, description=description)
         embeds.set_thumbnail(url=self.client.user.avatar_url)
-        if isinstance(command, Group):
+        if isinstance(command, CustomGroup):
             embeds.add_field(name=literals('send_command_help')['subcommand'],
                              value=f'```\n{brief_group(command)}\n```')
         for check in command.checks:

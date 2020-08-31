@@ -8,6 +8,7 @@ from extensions.shtelo_cog import get_application_sheet
 from modules import BotProtocol, Request, CustomCog, doc_read
 from utils import get_cog, get_constant, Log, literals, FreshData, split_by_length
 
+MESSAGE_MAX_LENGTH = 2000
 
 class ProtocolCog(CustomCog, BotProtocol, name=get_cog('ProtocolCog')['name']):
     """
@@ -64,7 +65,7 @@ class ProtocolCog(CustomCog, BotProtocol, name=get_cog('ProtocolCog')['name']):
 
         async def respond(data_, key_):
             here_request = request.generate_respond(signal=BotProtocol.HERE, addition=key_ + ' ')
-            addition_length = 1999 - len(str(here_request))
+            addition_length = MESSAGE_MAX_LENGTH - len(str(here_request)) - 1
             here_request.addition += data_[:addition_length]
             data_ = data_[addition_length:]
             await request.message.channel.send(str(here_request), delete_after=1)

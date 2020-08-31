@@ -200,7 +200,7 @@
     ":cruise_ship:": "\uD83D\uDEF3️",
     ":bellhop:": "\uD83D\uDECE️",
     ":bar_chart:": "\uD83D\uDCCA",
-    ":ballot_box_with_check:": "✅",
+    ":ballot_box_with_check:": "☑️",
     ":no_entry:": "⛔",
     ":medal:": "\uD83C\uDFC5",
     ":family_woman_girl_girl:": "\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC67",
@@ -209,14 +209,17 @@
     ":raised_hand:": "✋",
     ":negative_squared_cross_mark:": "❎",
     ":lock:": "\uD83D\uDD12",
-    ":wastebasket:": "\uD83D\uDDD1️"
+    ":wastebasket:": "\uD83D\uDDD1️",
+    ":arrow_left:": "⬅️",
+    ":arrow_right:": "➡️"
   },
   "send_command_help": {
     "subcommand": "\uD83D\uDCD7 하위 명령어"
   },
   "send_cog_list": {
     "title": "\uD83D\uDCD7 명령어 목록",
-    "description": "봇에 포함된 기능의 분류와 명령어 목록입니다. 자세히 알아보려면 `<P>도움말`을 사용해보세요."
+    "description": "봇에 포함된 기능의 분류와 명령어 목록입니다. 자세히 알아보려면 `<P>도움말`을 사용해보세요.",
+    "footer": "%s / %s 페이지"
   },
   "cog_brief": {
     "no_description": "사용 가능한 기능이 없습니다."
