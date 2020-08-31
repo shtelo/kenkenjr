@@ -8,7 +8,7 @@ import modules
 from modules import CustomCog, ChainedEmbed, CustomGroup
 from utils import get_cog, get_constant, literals, get_check, get_emoji
 
-COMMANDS_TIMEOUT = 10
+COMMANDS_TIMEOUT = 60
 
 
 def brief_cog(cog: Cog):
