@@ -142,13 +142,13 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
         embed = ChainedEmbed(title=literal['title'],
                              description=literal['description'])
         embed.set_thumbnail(url=self.client.user.avatar_url)
-        pages = list()
+        pages = dict()
         page = 0
         for cog_name, cog in self.client.cogs.items():
             name = cog_name
             if isinstance(cog, CustomCog):
                 name = cog.emoji + ' ' + name
-            pages.append((name, brief_cog(cog)))
+            pages[get_cog(type(cog).__name__)['priority']] = (name, brief_cog(cog))
         embed.add_field(name=pages[page][0], value=pages[page][1])
         embed.set_footer(text=literal['footer'] % (page + 1, len(pages)))
         message = await ctx.send(embed=embed)

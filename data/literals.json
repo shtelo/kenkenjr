@@ -98,39 +98,43 @@
   "_cog_": {
     "BaseCog": {
       "name": "기본 기능",
-      "emoji": "\uD83D\uDFE9"
-    },
-    "ControlCog": {
-      "name": "제어",
-      "emoji": "⚙️"
-    },
-    "GameCog": {
-      "name": "오락",
-      "emoji": "\uD83C\uDFB2"
-    },
-    "LogCog": {
-      "name": "기록",
-      "emoji": "\uD83D\uDCDD"
-    },
-    "ProtocolCog": {
-      "name": "프로토콜",
-      "emoji": "\uD83E\uDD16"
+      "emoji": "\uD83D\uDFE9",
+      "priority": 0
     },
     "HelpCog": {
       "name": "도움",
-      "emoji": "❓"
-    },
-    "ShteloCog": {
-      "name": "슈텔로",
-      "emoji": "⭐"
-    },
-    "EconomyCog": {
-      "name": "경제",
-      "emoji": "\uD83D\uDCB0"
+      "emoji": "❓",
+      "priority": 1
     },
     "DeckCog": {
       "name": "슈텔로 데크",
-      "emoji": "\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC67"
+      "emoji": "\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC67",
+      "priority": 2
+    },
+    "ShteloCog": {
+      "name": "슈텔로",
+      "emoji": "⭐",
+      "priority": 3
+    },
+    "GameCog": {
+      "name": "오락",
+      "emoji": "\uD83C\uDFB2",
+      "priority": 4
+    },
+    "ControlCog": {
+      "name": "제어",
+      "emoji": "⚙️",
+      "priority": 5
+    },
+    "ProtocolCog": {
+      "name": "프로토콜",
+      "emoji": "\uD83E\uDD16",
+      "priority": 6
+    },
+    "LogCog": {
+      "name": "기록",
+      "emoji": "\uD83D\uDCDD",
+      "priority": 7
     }
   },
   "_check_": {
