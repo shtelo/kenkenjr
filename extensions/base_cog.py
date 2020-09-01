@@ -1,5 +1,6 @@
 import asyncio
 from random import choice, random
+from re import findall, sub
 from typing import Union
 
 from discord import Message, User, Member, HTTPException
@@ -94,22 +95,23 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         nick = ctx.author.nick
         if nick is None:
             nick = ctx.author.name
-        level = 0
-        for d in range(NICK_MAX_LENGTH, 0, -1):
-            if ' ' * d in nick:
-                level = d + 1
-        if not level:
-            level = 1
         if ' ' in nick:
             nick = nick.replace(' ', '')
-        nick = (' ' * level).join(list(nick))
+        distance_regex = '\\u2003+'
+        if found := findall(distance_regex, nick):
+            level = len(min(found, key=len)) + 1
+            print(nick)
+            nick = sub(distance_regex, ' ' * level, nick)
+            print(nick)
+        else:
+            level = 1
+            nick = ' '.join(list(nick))
         try:
             await ctx.author.edit(nick=nick)
         except HTTPException as e:
-            print(e)
             await ctx.send(literal['failed'])
             return
-        await ctx.send((' ' * level).join(list(literal['done'] % level)))
+        await ctx.send((' ' * level).join(list(literal['done'] % level)))
 
 
     # TODO add command about color pickers
