@@ -84,6 +84,8 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
                                         value='\n'.join([role.name for role in user.roles[1:]]))
         await ctx.send(embed=profile_embed)
 
+    # TODO add command about color pickers
+
 
 def setup(client: commands.Bot):
     client.add_cog(BaseCog(client))

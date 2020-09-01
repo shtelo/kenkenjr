@@ -4,7 +4,7 @@ from discord.ext.commands import Context
 import modules
 from modules import CustomCog, owner_only, guild_only, partner_only
 from modules.custom.custom_bot import Kenken
-from utils import get_cog, literals, reload_literals
+from utils import get_cog, literals, reload_literals, Log
 
 
 class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):
@@ -42,26 +42,27 @@ class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):
             raise e
         await ctx.channel.send(literals('delete')['done'] % count, delete_after=10)
 
-    @modules.group(name='리로드')
+    @modules.group(name='리로드', enabled=False)
     @owner_only()
     async def reload(self, ctx: Context):
         await self.reload_literals(ctx)
         await self.reload_cogs(ctx)
 
-    @reload.command(name='리터럴')
+    @reload.command(name='리터럴', enabled=False)
     @owner_only()
     async def reload_literals(self, ctx: Context):
         reload_literals()
         await ctx.send(literals('reload_literals')['done'])
 
-    @reload.command(name='코그', aliases=('기능',))
+    @reload.command(name='코그', aliases=('기능',), enabled=False)
     @owner_only()
     async def reload_cogs(self, ctx: Context):
         message = await ctx.send(literals('reload_cogs')['start'])
         try:
             done = self.client.reload_all_extensions()
         except Exception as e:
-            await message.edit(content=(literals('reload_cogs')['failed'] + '```\n' + e + '```'))
+            await message.edit(content=(literals('reload_cogs')['failed'] + '```\n' + str(e) + '```'))
+            Log.error(e)
         else:
             if done:
                 await message.edit(content=literals('reload_cogs')['done'])

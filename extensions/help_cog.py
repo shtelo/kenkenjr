@@ -19,9 +19,13 @@ def brief_cog(cog: Cog):
         brief = ''
     if not cog.get_commands():
         return brief
-    brief += '\n'
+    commands = ''
     for command in cog.get_commands():
-        brief += brief_command(command) + '\n'
+        if not command.enabled:
+            continue
+        commands += brief_command(command) + '\n'
+    if commands:
+        brief += '\n' + commands
     return brief
 
 
@@ -30,6 +34,8 @@ def brief_group(group: CustomGroup):
     if group.brief is not None:
         brief += ': ' + group.brief
     for command in group.commands:
+        if not command.enabled:
+            continue
         if isinstance(command, CustomGroup):
             brief += '\n' + brief_group(command)
         else:
