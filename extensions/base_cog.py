@@ -1,13 +1,16 @@
+import asyncio
 from random import choice, random
 from typing import Union
 
-from discord import Message, User, Member
+from discord import Message, User, Member, HTTPException
 from discord.ext import commands
 from discord.ext.commands import Context, Bot, MemberConverter, BadArgument
 
 import modules
-from modules import CustomCog, tokens_len, ChainedEmbed
+from modules import CustomCog, tokens_len, ChainedEmbed, guild_only
 from utils import get_cog, get_path, Log, literals
+
+NICK_MAX_LENGTH = 32
 
 
 class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
@@ -83,6 +86,31 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
                 profile_embed.add_field(name=literal['roles'],
                                         value='\n'.join([role.name for role in user.roles[1:]]))
         await ctx.send(embed=profile_embed)
+
+    @modules.command(name='거리두기', aliases=('사회적거리두기', '안전거리'))
+    @guild_only()
+    async def distance(self, ctx: Context):
+        literal = literals('distance')
+        nick = ctx.author.nick
+        if nick is None:
+            nick = ctx.author.name
+        level = 0
+        for d in range(NICK_MAX_LENGTH, 0, -1):
+            if ' ' * d in nick:
+                level = d + 1
+        if not level:
+            level = 1
+        if ' ' in nick:
+            nick = nick.replace(' ', '')
+        nick = (' ' * level).join(list(nick))
+        try:
+            await ctx.author.edit(nick=nick)
+        except HTTPException as e:
+            print(e)
+            await ctx.send(literal['failed'])
+            return
+        await ctx.send((' ' * level).join(list(literal['done'] % level)))
+
 
     # TODO add command about color pickers
 

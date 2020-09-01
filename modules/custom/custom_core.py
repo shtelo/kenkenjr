@@ -88,6 +88,16 @@ def guild_only():
     return check(predicate)
 
 
+def member_only(guild_id):
+
+    async def predicate(ctx: Context):
+        guild = await ctx.bot.fetch_guild(guild_id)
+        return guild.fetch_member(ctx.author.id) is not None
+
+    predicate.name = 'member_only'
+    return check(member_only)
+
+
 def dm_only():
     def predicate(ctx: Context) -> bool:
         return ctx.guild is None

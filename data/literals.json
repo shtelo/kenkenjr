@@ -470,5 +470,9 @@
   },
   "change_deck_name": {
     "before": "\uD83D\uDDD1 이전 이름"
+  },
+  "distance": {
+    "done": "사회적거리두기%s단계!",
+    "failed": "닉네임을 바꿀 수 없어!"
   }
 }
