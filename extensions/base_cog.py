@@ -3,13 +3,13 @@ from random import choice, random
 from re import findall, sub
 from typing import Union
 
-from discord import Message, User, Member, HTTPException
+from discord import Message, User, Member, HTTPException, RawReactionActionEvent
 from discord.ext import commands
 from discord.ext.commands import Context, Bot, MemberConverter, BadArgument
 
 import modules
 from modules import CustomCog, tokens_len, ChainedEmbed, guild_only
-from utils import get_cog, get_path, Log, literals
+from utils import get_cog, get_path, Log, literals, get_emoji
 
 NICK_MAX_LENGTH = 32
 
@@ -57,6 +57,13 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
             else:
                 Log.command('kenkenjr called.')
                 await message.channel.send(f'{choice(self.reactions)}')
+
+    @CustomCog.listener()
+    async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
+        if payload.emoji.name == get_emoji(':wastebasket:'):
+            message = await (await self.client.fetch_channel(payload.channel_id)).fetch_message(payload.message_id)
+            if message.author.id == self.client.user.id:
+                await message.delete()
 
     @modules.command(name='안녕', aliases=('반가워', 'ㅎㅇ', 'greet', 'hi', 'hello'))
     async def greet(self, ctx: Context):
