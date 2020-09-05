@@ -113,7 +113,6 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
             return
         await ctx.send((' ' * level).join(list(literal['done'] % level)))
 
-
     # TODO add command about color pickers
 
 

@@ -1,17 +1,20 @@
 import asyncio
+from random import choice
 from typing import Coroutine
 
 import discord
-from discord import Member, Reaction, User
+from discord import Member, Reaction, User, Role, Message, PermissionOverwrite
 from discord.abc import GuildChannel
-from discord.ext.commands import Bot, Context, BadArgument, check, BucketType
+from discord.ext.commands import Bot, Context, BadArgument, check, BucketType, MemberConverter
 
 import modules
-from modules import CustomCog, ChainedEmbed, shared_cooldown, DeckHandler, Deck, DeckConverter, guild_only
-from utils import get_cog, literals, get_emoji, wrap_codeblock
+from modules import CustomCog, ChainedEmbed, shared_cooldown, DeckHandler, Deck, DeckConverter, guild_only, partner_only
+from utils import get_cog, literals, get_emoji, wrap_codeblock, get_constant, check_length
 
 NSFW_TIMEOUT = 60
 NSFW_EMOJI = get_emoji(':underage:')
+
+DECK_START_TIMEOUT = 60
 
 deck_cooldown = shared_cooldown(1, 60, BucketType.category)
 
@@ -33,19 +36,6 @@ def wait_until_deck_handler_ready():
 def check_deck_manager(deck: Deck, user: User):
     if user.id != deck.manager.id:
         raise BadArgument(f'{user} is not a manager of deck {deck.name}')
-
-
-def check_length(argument: str, limit: int):
-    if len(argument) > limit:
-        raise BadArgument(f'argument length is over {limit}')
-
-
-async def save_deck(ctx: Context, deck: Deck, deck_embed: ChainedEmbed, save: Coroutine):
-    literal = literals('save_deck')
-    message = await ctx.send(literal['start'], embed=deck_embed)
-    await save
-    await message.edit(content=literal['done'] % deck.name)
-
 
 class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
     """
@@ -78,7 +68,8 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         if deck.pending:
             deck_embed.add_field(name=literal['pending'] % len(deck.pending),
                                  value=' '.join([str(member) for member in deck.pending]))
-        deck_embed.add_field(name=literal['members'] % len(deck_members), value='\n'.join(deck_members))
+        if deck_members:
+            deck_embed.add_field(name=literal['members'] % len(deck_members), value='\n'.join(deck_members))
         deck_embed.set_footer(text=literal['id'] % deck.id)
         return deck_embed
 
@@ -111,7 +102,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         deck_embed = await self.get_deck_embed(deck)
         deck_embed.clear_fields()
         deck_embed.add_field(name=literal['before'], value=old_topic)
-        await save_deck(ctx, deck, deck_embed, self.deck_handler.save_deck(deck))
+        await self.save_deck(ctx, deck, deck_embed)
 
     async def change_deck_id(self, ctx: Context, deck: Deck, new_id: str):
         literal = literals('change_deck_id')
@@ -120,7 +111,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         deck_embed = await self.get_deck_embed(deck)
         deck_embed.clear_fields()
         deck_embed.add_field(name=literal['before'], value=old_id)
-        await save_deck(ctx, deck, deck_embed, self.deck_handler.save_deck(deck))
+        await self.save_deck(ctx, deck, deck_embed)
 
     async def change_deck_name(self, ctx: Context, deck: Deck, new_name: str):
         literal = literals('change_deck_name')
@@ -133,7 +124,33 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         async def change_deck_name_():
             await asyncio.wait([deck.category_channel.edit(name=new_name), deck.role.edit(name=new_name)])
 
-        await save_deck(ctx, deck, deck_embed, change_deck_name_())
+        await self.save_deck(ctx, deck, deck_embed, change_deck_name_())
+
+    def generate_new_id(self) -> str:
+        def generate() -> str:
+            string = Deck.VALID_ID
+            result = ''
+            for i in range(Deck.ID_LENGTH):
+                result += choice(string)
+
+            return result
+
+        while True:
+            id_ = generate()
+            if self.deck_handler.get_deck_by_id(id_) is None:
+                break
+
+        return id_
+
+    async def save_deck(self, ctx: Context, deck: Deck, deck_embed: ChainedEmbed = None, save: Coroutine = None):
+        literal = literals('save_deck')
+        if deck_embed is None:
+            deck_embed = await self.get_deck_embed(deck)
+        if save is None:
+            save = self.deck_handler.save_deck(deck)
+        message = await ctx.send(literal['start'], embed=deck_embed)
+        await save
+        await message.edit(content=literal['done'] % deck.name)
 
     @CustomCog.listener()
     async def on_guild_channel_update(self, before: GuildChannel, _: GuildChannel):
@@ -202,6 +219,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             try:
                 await self.client.wait_for('reaction_add', check=check_, timeout=NSFW_TIMEOUT)
             except asyncio.TimeoutError:
+                await ctx.message.add_reaction(get_emoji(':negative_squared_cross_mark:'))
                 return
             finally:
                 await message.delete()
@@ -334,18 +352,56 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             return
         await self.change_deck_name(ctx, deck, new_name)
 
+    @deck_.command(name='개설', aliases=('추가',))
+    @wait_until_deck_handler_ready()
+    async def deck_start(self, ctx: Context, *, description: str):
+        literal = literals('deck_start')
+        partner_role: Role = discord.utils.get(await self.deck_handler.guild.fetch_roles(),
+                                               id=get_constant('partner_role'))
+        if partner_role in ctx.author.roles:
+            await ctx.send(literal['manager'])
+
+            def is_reply(message_: Message):
+                return message_.author.id == ctx.author.id
+
+            while True:
+                try:
+                    message = await self.client.wait_for('message', timeout=DECK_START_TIMEOUT, check=is_reply)
+                except asyncio.TimeoutError:
+                    await asyncio.wait([ctx.message.add_reaction(get_emoji(':negative_squared_cross_mark:')),
+                                        ctx.message.delete()])
+                    return
+                try:
+                    manager = await MemberConverter().convert(ctx, message.content)
+                except BadArgument:
+                    await ctx.send(literal('manager_failed'))
+                    continue
+                break
+            role = await self.deck_handler.guild.create_role(name=description)
+            await manager.add_roles(role)
+            category_channel = await self.deck_handler.guild.create_category(
+                description,
+                overwrites={self.deck_handler.guild.default_role: PermissionOverwrite(read_messages=False),
+                            partner_role: PermissionOverwrite(read_messages=True)})
+            default_channel = await self.deck_handler.guild.create_text_channel(description, category=category_channel)
+            deck = Deck(id=self.generate_new_id(), manager=manager, name=description, category_channel=category_channel,
+                        default_channel=default_channel, role=role)
+            await self.save_deck(ctx, deck)
+        else:
+            partner_channel = await self.client.fetch_channel(get_constant('partner_channel'))
+            check_length(description, Deck.TOPIC_MAX_LENGTH)
+            await asyncio.wait([partner_channel.send(literal['pending'] % (ctx.author.mention, description)),
+                                ctx.send(literal['applied'] % description)])
+
     # TODO: code up the commands below
-    # @deck_.command(name='개설', aliases=('추가',), enabled=False)
-    # @wait_until_deck_handler_ready()
-    # async def deck_start(self, ctx: Context):
-    #     pass
-    #
-    # @deck_.command(name='폐쇄', aliases=('삭제',), enabled=False)
+    # @deck_.command(name='폐쇄', aliases=('삭제',))
+    # @partner_only()
     # @wait_until_deck_handler_ready()
     # async def deck_end(self, ctx: Context):
-    #     pass
-    #
-    # @deck_.group(name='설정', enabled=False)
+    #     deck = await DeckConverter().convert(ctx, str(ctx.channel.id))
+    #     del self.deck_handler.decks[deck.category_channel.id]
+
+    # @deck_.group(name='설정')
     # @partner_only()
     # @wait_until_deck_handler_ready()
     # async def deck_setting(self, ctx: Context):

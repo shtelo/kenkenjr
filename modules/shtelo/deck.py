@@ -26,14 +26,20 @@ class Deck:
     MANAGER = '매니저'
     PENDING = '가입신청자'
 
+    VALID_ID = '0123456789_acdefghijkmnprstvwxyzACEFGHJKLMNPRTVWXY'
+
     TOPIC_MAX_LENGTH = 512
     NAME_MAX_LENGTH = 64
+    ID_LENGTH = 4
 
     def __init__(self, **kwargs):
-        self.public: bool = self.PUBLIC_EMOJI in kwargs.get('settings')
-        self.nsfw: bool = self.NSFW_EMOJI in kwargs.get('settings')
-        self.auto: bool = self.AUTO_EMOJI in kwargs.get('settings')
-        self.lock: bool = self.LOCK_EMOJI in kwargs.get('settings')
+        kwargs.setdefault('settings', list())
+        kwargs.setdefault('pending', list())
+        kwargs.setdefault('topic', '')
+        self.public: bool = self.PUBLIC_EMOJI in (settings := kwargs.get('settings'))
+        self.nsfw: bool = self.NSFW_EMOJI in settings
+        self.auto: bool = self.AUTO_EMOJI in settings
+        self.lock: bool = self.LOCK_EMOJI in settings
         self.id: str = kwargs.get('id')
         self.manager: Member = kwargs.get('manager')
         self.pending: list = kwargs.get('pending')
