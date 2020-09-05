@@ -66,14 +66,14 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
 
     @modules.command(name='안녕', aliases=('반가워', 'ㅎㅇ', 'greet', 'hi', 'hello'))
     async def greet(self, ctx: Context):
-        Log.command('detected.')
         await ctx.send(self.get_greeting(ctx.message))
 
     @modules.command(name='핑', aliases=('ping', 'p'))
     @tokens_len(1)
     async def ping(self, ctx: Context):
-        Log.command('detected.')
-        await ctx.send('???')
+        literal = literals('ping')
+        message = await ctx.send(literal['start'])
+        await message.edit(content=literal['done'] % (message.created_at - ctx.message.created_at))
 
     @modules.command(name='프로필', aliases=('profile', '사용자', 'user'))
     async def profile(self, ctx: Context, *, user: Union[Member, User] = None):
