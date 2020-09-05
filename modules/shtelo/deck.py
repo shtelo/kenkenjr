@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from re import match, sub
+from typing import Optional
 
 import discord
 from discord import Guild, Client, TextChannel, CategoryChannel, VoiceChannel, Member, Role
@@ -102,8 +103,8 @@ class DeckHandler:
 
     def __init__(self, client: Client):
         self.client: Client = client
-        self.guild: Guild = None
-        self.decks: dict = None
+        self.guild: Optional[Guild] = None
+        self.decks: Optional[dict] = None
         self.ready: bool = False
         client.loop.create_task(self._fetch_all())
 
@@ -174,9 +175,9 @@ class DeckHandler:
                     role=deck_role)
         self.decks[category_id] = deck
 
-    @staticmethod
-    async def save_deck(deck: Deck):
+    async def save_deck(self, deck: Deck):
         await deck.default_channel.edit(topic=deck.to_channel_topic())
+        self.decks[deck.category_channel.id] = deck
 
     def get_deck_by_channel(self, channel: GuildChannel):
         if isinstance(channel, TextChannel) or isinstance(channel, VoiceChannel):

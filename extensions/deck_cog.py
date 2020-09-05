@@ -374,9 +374,10 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
                 try:
                     manager = await MemberConverter().convert(ctx, message.content)
                 except BadArgument:
-                    await ctx.send(literal('manager_failed'))
+                    await ctx.send(literal['manager_failed'])
                     continue
                 break
+            message = await ctx.send(literal['start'])
             role = await self.deck_handler.guild.create_role(name=description)
             await manager.add_roles(role)
             category_channel = await self.deck_handler.guild.create_category(
@@ -387,6 +388,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             deck = Deck(id=self.generate_new_id(), manager=manager, name=description, category_channel=category_channel,
                         default_channel=default_channel, role=role)
             await self.save_deck(ctx, deck)
+            await message.edit(content=literal['done'] % description)
         else:
             partner_channel = await self.client.fetch_channel(get_constant('partner_channel'))
             check_length(description, Deck.TOPIC_MAX_LENGTH)
