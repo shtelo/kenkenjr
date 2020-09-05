@@ -1,4 +1,3 @@
-import asyncio
 from random import choice, random
 from re import findall, sub
 from typing import Union

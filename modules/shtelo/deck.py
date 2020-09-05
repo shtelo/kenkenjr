@@ -68,7 +68,7 @@ class Deck:
             setting.append(self.LOCK_EMOJI)
         deck_str += ('\n' + ' '.join(setting) if setting else '')
         deck_str += '\n' + self.MANAGER + ': ' + self.manager.mention
-        deck_str += ('\n' + self.PENDING + ': ' + '\n'.join([member.mention for member in self.pending])
+        deck_str += ('\n' + self.PENDING + ': ' + ' '.join([member.mention for member in self.pending])
                      if self.pending else '')
         deck_str += '\n\n' + self.topic[:self.TOPIC_MAX_LENGTH]
         return deck_str
