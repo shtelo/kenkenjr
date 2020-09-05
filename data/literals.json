@@ -217,7 +217,9 @@
     ":lock:": "\uD83D\uDD12",
     ":wastebasket:": "\uD83D\uDDD1️",
     ":arrow_left:": "⬅️",
-    ":arrow_right:": "➡️"
+    ":arrow_right:": "➡️",
+    ":timer:": "⏲️",
+    ":exclamation:": "❗"
   },
   "send_command_help": {
     "subcommand": "\uD83D\uDCD7 하위 명령어"
@@ -267,7 +269,8 @@
     "false": "아니오"
   },
   "get_state": {
-    "received": " ✅",
+    "not_handled": " ❗",
+    "received": " ⏲️",
     "approved": " ☑️",
     "rejected": " ⛔"
   },

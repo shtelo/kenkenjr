@@ -36,7 +36,7 @@ def get_application_sheet():
     return keys, rows
 
 
-def state_of_application(application: list):
+def get_state_of_application(application: list):
     literal = literals('get_state')
     if application[STATE] == STATE_RECEIVED:
         return literal['received']
@@ -44,13 +44,13 @@ def state_of_application(application: list):
         return literal['approved']
     elif application[STATE] == STATE_REJECTED:
         return literal['rejected']
-    return ''
+    return literal['not_handled']
 
 
 def get_application_embed(data: list):
     literal = literals('get_application_embed')
     discord_id = data[DISCORD_ID]
-    title = literal['title'] % discord_id + state_of_application(data)
+    title = literal['title'] % discord_id + get_state_of_application(data)
     embeds = ChainedEmbed(title=title,
                           description=literal['description'] % (data[TIMESTAMP], data[EMAIL]))
     if data[SUBACCOUNT] != literal['false']:
@@ -73,7 +73,7 @@ def get_application_embed(data: list):
 def get_application_raw_embed(keys: list, data: list):
     literal = literals('get_application_raw_embed')
     discord_id = data[DISCORD_ID]
-    title = literal['title'] % discord_id + state_of_application(data)
+    title = literal['title'] % discord_id + get_state_of_application(data)
     embeds = ChainedEmbed(title=title, description=literal['description'])
     for i in range(len(keys)):
         if data[i]:
@@ -108,7 +108,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         _, replies = get_application_sheet()
         count = len(replies)
         for reply in replies:
-            if reply[STATE] or reply[STATE] == STATE_RECEIVED:
+            if reply[STATE] and reply[STATE] != STATE_RECEIVED:
                 count -= 1
                 continue
             embeds = get_application_embed(reply)
@@ -135,7 +135,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         keys, replies = get_application_sheet()
         count = len(replies)
         for reply in replies:
-            if reply[STATE] or reply[STATE] == STATE_RECEIVED:
+            if reply[STATE] and reply[STATE] != STATE_RECEIVED:
                 count -= 1
                 continue
             embeds = get_application_raw_embed(keys, reply)
