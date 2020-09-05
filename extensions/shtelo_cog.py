@@ -17,9 +17,9 @@ TWITTER_ID = 7
 STATE = 13
 REMARKS = 14
 HOUR = 3600
-RECEIVED = '접수됨'
-APPROVED = '승인됨'
-REJECTED = '기각됨'
+STATE_RECEIVED = '접수됨'
+STATE_APPROVED = '승인됨'
+STATE_REJECTED = '기각됨'
 NSFW_TIMEOUT = 60
 NSFW_EMOJI = get_emoji(':underage:')
 
@@ -38,11 +38,11 @@ def get_application_sheet():
 
 def state_of_application(application: list):
     literal = literals('get_state')
-    if application[STATE] == RECEIVED:
+    if application[STATE] == STATE_RECEIVED:
         return literal['received']
-    elif application[STATE] == APPROVED:
+    elif application[STATE] == STATE_APPROVED:
         return literal['approved']
-    elif application[STATE] == REJECTED:
+    elif application[STATE] == STATE_REJECTED:
         return literal['rejected']
     return ''
 
@@ -108,7 +108,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         _, replies = get_application_sheet()
         count = len(replies)
         for reply in replies:
-            if reply[STATE]:
+            if reply[STATE] or reply[STATE] == STATE_RECEIVED:
                 count -= 1
                 continue
             embeds = get_application_embed(reply)
@@ -135,7 +135,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         keys, replies = get_application_sheet()
         count = len(replies)
         for reply in replies:
-            if reply[STATE]:
+            if reply[STATE] or reply[STATE] == STATE_RECEIVED:
                 count -= 1
                 continue
             embeds = get_application_raw_embed(keys, reply)
