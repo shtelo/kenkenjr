@@ -272,38 +272,38 @@
     "rejected": " ⛔"
   },
   "applications": {
-    "start": "새로운 가입신청서 목록을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게!",
-    "done": "새로운 가입신청서를 %s개 발견했어!",
-    "not_found": "새로운 가입신청서가 없어..."
+    "start": "새로운 가입신청서 목록을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/",
+    "done": "새로운 가입신청서를 %s개 발견했어! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/",
+    "not_found": "새로운 가입신청서가 없어... 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/"
   },
   "applications_all": {
-    "start": "가입신청서 목록을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게!",
-    "done": "가입신청서를 %s개 발견했어!",
-    "not_found": "아직 가입신청서가 없나봐..."
+    "start": "가입신청서 목록을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/",
+    "done": "가입신청서를 %s개 발견했어! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/",
+    "not_found": "아직 가입신청서가 없나봐... 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/"
   },
   "application_raw": {
-    "start": "새로운 가입신청서 원본을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게!",
-    "done": "새로운 가입신청서 원본을 %s개 발견했어!",
-    "not_found": "새로운 가입신청서가 없어..."
+    "start": "새로운 가입신청서 원본을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/",
+    "done": "새로운 가입신청서 원본을 %s개 발견했어! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/",
+    "not_found": "새로운 가입신청서가 없어... 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/"
   },
   "application_raw_all": {
-    "start": "가입신청서 원본을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게!",
-    "done": "가입신청서 원본을 %s개 발견했어!",
-    "not_found": "아직 가입신청서가 없나봐..."
+    "start": "가입신청서 원본을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/",
+    "done": "가입신청서 원본을 %s개 발견했어! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/",
+    "not_found": "아직 가입신청서가 없나봐... 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/"
   },
   "get_application_raw_embed": {
     "done": " ✅",
     "title": "__%s__의 가입신청서",
-    "description": "가입신청서 원본 양식입니다."
+    "description": "가입신청서의 원본 양식이야!"
   },
   "regulation": {
-    "start": "슈텔로 회칙을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게!",
+    "start": "슈텔로 회칙을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/document/d/17rg7J1gajNO1NVhbbPgjntSVqK1rn1gwh4DwIaEz9I4/",
     "done": "슈텔로 회칙을 조회했어! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/document/d/17rg7J1gajNO1NVhbbPgjntSVqK1rn1gwh4DwIaEz9I4/",
     "no_keyword": "슈텔로 회칙의 목차야!\n내용을 자세히 확인하려면 명령어 뒤에 목차의 제목을 붙여서 사용해봐! \n예를 들어 '데크'에 관한 회칙을 읽고 싶으면 `<P>회칙 데크` 이렇게 하면 돼!",
     "not_found": "'%s' 키워드와 관련된 내용이 회칙에 없어!"
   },
   "regulation_all": {
-    "start": "슈텔로 회칙을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게!",
+    "start": "슈텔로 회칙을 조회하고 있어... 조회가 끝나면 DM으로 보내줄게! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/document/d/17rg7J1gajNO1NVhbbPgjntSVqK1rn1gwh4DwIaEz9I4/",
     "done": "슈텔로 회칙을 조회했어! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/document/d/17rg7J1gajNO1NVhbbPgjntSVqK1rn1gwh4DwIaEz9I4/"
   },
   "IndianPoker.start_round": {
