@@ -192,7 +192,8 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         literal = literals('deck_list')
         list_embeds = ChainedEmbed(title=literal['title'],
                                    description='\n'.join([deck.get_brief()
-                                                          for deck in self.deck_handler.decks.values()]))
+                                                          for deck in sorted(self.deck_handler.decks.values(),
+                                                                             key=lambda item: item.id)]))
         list_embeds.set_thumbnail(url=self.client.user.avatar_url)
         for embed in list_embeds.to_list():
             await ctx.send(embed=embed)
