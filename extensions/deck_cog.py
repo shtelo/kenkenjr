@@ -383,7 +383,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             await asyncio.wait([partner_channel.send(literal['pending'] % (author.mention, description)),
                                 ctx.send(literal['applied'] % description)])
 
-    @deck_.command(name='폐쇄', aliases=('삭제',))
+    @deck_.command(name='삭제', aliases=('폐쇄', '종료'))
     @guild_only()
     @wait_until_deck_handler_ready()
     async def deck_end(self, ctx: Context, *, deck: DeckConverter = None):

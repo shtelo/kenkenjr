@@ -120,6 +120,7 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         await ctx.send((' ' * level).join(list(literal['done'] % level)))
 
     # TODO add command about color pickers
+    # TODO add command about guild profile
 
 
 def setup(client: commands.Bot):
