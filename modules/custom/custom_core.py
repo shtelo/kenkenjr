@@ -111,8 +111,8 @@ def for_guilds(guild_id: tuple or int):
         guild_id = (guild_id,)
 
     def predicate(ctx: Context) -> bool:
-        if ctx.message.guild_profile is not None:
-            return ctx.message.guild_profile.id in guild_id
+        if ctx.message.guild is not None:
+            return ctx.message.guild.id in guild_id
         return False
 
     predicate.name = 'for_guilds'
@@ -135,8 +135,8 @@ def avoid_guilds(guild_id: tuple or int):
         guild_id = (guild_id,)
 
     def predicate(ctx: Context) -> bool:
-        if ctx.message.guild_profile:
-            return ctx.message.guild_profile.id not in guild_id
+        if ctx.message.guild:
+            return ctx.message.guild.id not in guild_id
         return True
 
     predicate.name = 'avoid_guilds'

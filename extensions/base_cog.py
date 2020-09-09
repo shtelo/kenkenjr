@@ -3,7 +3,6 @@ from random import choice, random
 from re import findall, sub
 from typing import Union
 
-import discord
 from discord import Message, User, Member, HTTPException, RawReactionActionEvent, Guild, Status, Reaction
 from discord.ext import commands
 from discord.ext.commands import Context, Bot, MemberConverter, BadArgument
