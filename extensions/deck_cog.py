@@ -400,7 +400,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             await message.add_reaction(CONFIRM_EMOJI)
 
             def is_reaction(reaction_: Reaction, user_: User):
-                return user_.id == author.id and reaction_.emoji == CONFIRM_EMOJI
+                return user_.id == author.id and reaction_.message.id == message.id and reaction_.emoji == CONFIRM_EMOJI
 
             try:
                 await self.client.wait_for('reaction_add', check=is_reaction, timeout=DECK_END_TIMEOUT)

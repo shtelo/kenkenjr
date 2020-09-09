@@ -137,7 +137,8 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         await message.add_reaction(DETAIL_EMOJI)
 
         def is_reaction(reaction_: Reaction, user_: User):
-            return user_ != self.client.user and (reaction_.emoji == DETAIL_EMOJI or reaction_.emoji == FOLD_EMOJI)
+            return user_ != self.client.user and reaction_.message.id == message.id \
+                   and (reaction_.emoji == DETAIL_EMOJI or reaction_.emoji == FOLD_EMOJI)
 
         while True:
             try:
@@ -188,7 +189,8 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         await message.add_reaction(DETAIL_EMOJI)
 
         def is_reaction(reaction_: Reaction, user_: User):
-            return user_ != self.client.user and (reaction_.emoji == DETAIL_EMOJI or reaction_.emoji == FOLD_EMOJI)
+            return user_ != self.client.user and reaction_.message.id == message.id \
+                   and (reaction_.emoji == DETAIL_EMOJI or reaction_.emoji == FOLD_EMOJI)
 
         while True:
             try:
