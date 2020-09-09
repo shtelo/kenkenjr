@@ -62,6 +62,7 @@
     "요트": "요트를 시작합니다.",
     "요트 도움말": "요트의 규칙을 확인합니다.",
     "프로필": "사용자의 프로필을 확인합니다.",
+    "서버": "서버의 정보를 확인합니다.",
     "회의록": "회의록 색인 문서의 링크를 확인합니다.",
     "데크": "개설된 데크의 목록이나 현재 데크의 정보를 확인합니다.",
     "데크 갱신": "데크의 정보를 갱신합니다.",
@@ -222,7 +223,11 @@
     ":arrow_left:": "⬅️",
     ":arrow_right:": "➡️",
     ":timer:": "⏲️",
-    ":exclamation:": "❗"
+    ":exclamation:": "❗",
+    ":gem:": "\uD83D\uDC8E",
+    ":sunny:": "☀️",
+    ":tada:": "\uD83C\uDF89",
+    ":x:": "❌"
   },
   "send_command_help": {
     "subcommand": "\uD83D\uDCD7 하위 명령어"
@@ -456,8 +461,10 @@
   "deck_rejected": {
     "done": "%s의 **%s** 데크 가입을 거절했어!"
   },
-  "profile": {
-    "roles": "역할"
+  "get_profile_embed": {
+    "join": "\uD83C\uDF89 서버 가입",
+    "boost": "\uD83D\uDC8E 서버 부스트",
+    "roles": "\uD83C\uDFF7️ 역할"
   },
   "edit_deck_topic": {
     "before": "\uD83D\uDDD1️ 이전 설명"
@@ -502,5 +509,12 @@
     "confirm": "**__데크를 삭제하면 다시 복구할 수 없어!__**\n**%s** 데크를 정말로 삭제하려면 아래 ✅ 반응을 눌러줘...",
     "start": "**%s** 데크를 삭제하고 있어...",
     "done": "**%s** 데크를 삭제했어!"
+  },
+  "get_guild_profile_embed": {
+    "author": "%s의 서버",
+    "description": "**%s** 서버\n회원 **%s**명",
+    "tier": "서버 부스트 **%s**단계",
+    "online": "☀️ 온라인 회원 **%s**명",
+    "boost": "\uD83D\uDC8E 서버 부스트 **%s**회"
   }
 }

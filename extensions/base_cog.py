@@ -1,8 +1,10 @@
+import asyncio
 from random import choice, random
 from re import findall, sub
 from typing import Union
 
-from discord import Message, User, Member, HTTPException, RawReactionActionEvent
+import discord
+from discord import Message, User, Member, HTTPException, RawReactionActionEvent, Guild, Status, Reaction
 from discord.ext import commands
 from discord.ext.commands import Context, Bot, MemberConverter, BadArgument
 
@@ -11,6 +13,54 @@ from modules import CustomCog, tokens_len, ChainedEmbed, guild_only
 from utils import get_cog, get_path, Log, literals, get_emoji
 
 NICK_MAX_LENGTH = 32
+
+DETAIL_EMOJI = get_emoji(':question_mark:')
+FOLD_EMOJI = get_emoji(':x:')
+
+PROFILE_TIMEOUT = 60
+
+
+def get_profile_embed(user: User, brief: bool = True):
+    literal = literals('get_profile_embed')
+    profile_embed = ChainedEmbed(title=user.display_name, color=user.colour, description=str(user))
+    profile_embed.set_thumbnail(url=user.avatar_url)
+    if isinstance(user, Member):
+        profile_embed.set_author(name=user.guild.name + ' ' + user.top_role.name, icon_url=user.guild.icon_url)
+    if not brief:
+        profile_embed.set_footer(text=f'{user.created_at} · {user.id}')
+        if isinstance(user, Member):
+            profile_embed.add_field(name=literal['join'], value=user.joined_at)
+            if user.premium_since:
+                profile_embed.add_field(name=literal['boost'], value=str(user.premium_since))
+            if roles := user.roles[1:]:
+                roles.reverse()
+                profile_embed.add_field(name=literal['roles'],
+                                        value='\n'.join([role.name for role in roles]))
+    return profile_embed
+
+
+def get_guild_profile_embed(guild: Guild, brief: bool = True):
+    literal = literals('get_guild_profile_embed')
+    online_members = list()
+    for member in guild.members:
+        if member.status == Status.online:
+            online_members.append(member)
+    description = literal['description'] % (guild.region, guild.member_count)
+    if guild.premium_tier:
+        description += '\n' + literal['tier'] % guild.premium_tier
+    guild_embed = ChainedEmbed(title=guild.name, description=description)
+    guild_embed.set_author(name=literal['author'] % str(guild.owner), icon_url=guild.owner.avatar_url)
+    guild_embed.set_thumbnail(url=guild.icon_url)
+    if not brief:
+        if guild.premium_subscription_count:
+            guild_embed.add_field(name=literal['boost'] % guild.premium_subscription_count,
+                                  value='\n'.join(str(subscriber) for subscriber in guild.premium_subscribers))
+        if online_members:
+            guild_embed.add_field(name=literal['online'] % len(online_members),
+                                  value='\n'.join([str(member) for member in online_members]))
+        guild_embed.set_footer(text=f'{guild.created_at} · {guild.id}')
+        guild_embed.set_image(url=guild.splash_url)
+    return guild_embed
 
 
 class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
@@ -77,22 +127,35 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
 
     @modules.command(name='프로필', aliases=('profile', '사용자', 'user'))
     async def profile(self, ctx: Context, *, user: Union[Member, User] = None):
-        literal = literals('profile')
         if user is None:
             user = ctx.author
             try:
                 user = await MemberConverter().convert(ctx, str(user.id))
             except BadArgument:
                 pass
-        profile_embed = ChainedEmbed(title=user.display_name, color=user.colour, description='@' + str(user))
-        profile_embed.set_thumbnail(url=user.avatar_url)
-        profile_embed.set_footer(text=str(user.created_at))
-        if isinstance(user, Member):
-            profile_embed.set_author(name=user.guild.name + ' ' + user.top_role.name, icon_url=user.guild.icon_url)
-            if user.roles[1:]:
-                profile_embed.add_field(name=literal['roles'],
-                                        value='\n'.join([role.name for role in user.roles[1:]]))
-        await ctx.send(embed=profile_embed)
+        profile_embed = get_profile_embed(user)
+        message = await ctx.send(embed=profile_embed)
+        await message.add_reaction(DETAIL_EMOJI)
+
+        def is_reaction(reaction_: Reaction, user_: User):
+            return user_ != self.client.user and (reaction_.emoji == DETAIL_EMOJI or reaction_.emoji == FOLD_EMOJI)
+
+        while True:
+            try:
+                reaction, _ = await self.client.wait_for('reaction_add', check=is_reaction, timeout=PROFILE_TIMEOUT)
+            except asyncio.TimeoutError:
+                await message.clear_reaction(DETAIL_EMOJI)
+                await message.clear_reaction(FOLD_EMOJI)
+                break
+            else:
+                if reaction.emoji == DETAIL_EMOJI:
+                    await message.edit(embed=get_profile_embed(user, False))
+                    await message.clear_reaction(DETAIL_EMOJI)
+                    await message.add_reaction(FOLD_EMOJI)
+                else:
+                    await message.edit(embed=get_profile_embed(user))
+                    await message.clear_reaction(FOLD_EMOJI)
+                    await message.add_reaction(DETAIL_EMOJI)
 
     @modules.command(name='거리두기', aliases=('사회적거리두기', '안전거리'))
     @guild_only()
@@ -116,11 +179,36 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
             await ctx.author.edit(nick=nick)
         except HTTPException as e:
             await ctx.send(literal['failed'])
-            return
-        await ctx.send((' ' * level).join(list(literal['done'] % level)))
+        else:
+            await ctx.send((' ' * level).join(list(literal['done'] % level)))
+
+    @modules.command(name='서버', aliases=('길드',))
+    @guild_only()
+    async def guild_profile(self, ctx: Context):
+        message = await ctx.send(embed=get_guild_profile_embed(ctx.guild))
+        await message.add_reaction(DETAIL_EMOJI)
+
+        def is_reaction(reaction_: Reaction, user_: User):
+            return user_ != self.client.user and (reaction_.emoji == DETAIL_EMOJI or reaction_.emoji == FOLD_EMOJI)
+
+        while True:
+            try:
+                reaction, _ = await self.client.wait_for('reaction_add', check=is_reaction, timeout=PROFILE_TIMEOUT)
+            except asyncio.TimeoutError:
+                await message.clear_reaction(DETAIL_EMOJI)
+                await message.clear_reaction(FOLD_EMOJI)
+                break
+            else:
+                if reaction.emoji == DETAIL_EMOJI:
+                    await message.edit(embed=get_guild_profile_embed(ctx.guild, False))
+                    await message.clear_reaction(DETAIL_EMOJI)
+                    await message.add_reaction(FOLD_EMOJI)
+                else:
+                    await message.edit(embed=get_guild_profile_embed(ctx.guild))
+                    await message.clear_reaction(FOLD_EMOJI)
+                    await message.add_reaction(DETAIL_EMOJI)
 
     # TODO add command about color pickers
-    # TODO add command about guild profile
 
 
 def setup(client: commands.Bot):
