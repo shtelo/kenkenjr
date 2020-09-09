@@ -1,16 +1,17 @@
 from __future__ import annotations
 
 import asyncio
+from random import choice
 from re import match, sub
 from typing import Optional
 
 import discord
-from discord import Guild, Client, TextChannel, CategoryChannel, VoiceChannel, Member, Role
+from discord import Guild, Client, TextChannel, CategoryChannel, VoiceChannel, Member, Role, PermissionOverwrite
 from discord.abc import GuildChannel
 from discord.ext.commands import Converter, Context, TextChannelConverter, BadArgument, \
     VoiceChannelConverter, CategoryChannelConverter, CommandError
 
-from utils import singleton
+from utils import singleton, get_constant
 
 
 def mention_to_id(mention: str) -> int:
@@ -87,8 +88,6 @@ class Deck:
 
 @singleton
 class DeckHandler:
-    SHTELO_ID = 650533223520010261
-
     MENTION_REGEX = '<@!?\\d+>'
     ID_REGEX = '\\*id: [a-zA-Z0-9]{4,}'
     SETTING_REGEX = '({0}|{1}|{2}|{3})( ({0}|{1}|{2}|{3}))*'\
@@ -104,6 +103,7 @@ class DeckHandler:
     def __init__(self, client: Client):
         self.client: Client = client
         self.guild: Optional[Guild] = None
+        self.manager_role: Optional[Role] = None
         self.decks: Optional[dict] = None
         self.ready: bool = False
         client.loop.create_task(self._fetch_all())
@@ -112,6 +112,7 @@ class DeckHandler:
         await self.client.wait_until_ready()
         await self._fetch_guild()
         await self._fetch_decks()
+        self.manager_role = discord.utils.get(await self.guild.fetch_roles(), id=get_constant('manager_role'))
         self.ready = True
 
     async def wait_until_ready(self):
@@ -119,7 +120,7 @@ class DeckHandler:
             await asyncio.sleep(0.1)
 
     async def _fetch_guild(self):
-        self.guild = await self.client.fetch_guild(self.SHTELO_ID)
+        self.guild = await self.client.fetch_guild(get_constant('shtelo_guild'))
 
     async def fetch_decks(self):
         self.ready = False
@@ -179,6 +180,32 @@ class DeckHandler:
         await deck.default_channel.edit(topic=deck.to_channel_topic())
         self.decks[deck.category_channel.id] = deck
 
+    async def add_deck(self, name: str, manager: Member):
+        role: object = await self.guild.create_role(name=name)
+        roles = [role]
+        if self.manager_role not in manager.roles:
+            roles.append(self.manager_role)
+        category_channel = await self.guild.create_category(
+            name, overwrites={self.guild.default_role: PermissionOverwrite(read_messages=False),
+                              role: PermissionOverwrite(read_messages=True)})
+        default_channel = await self.guild.create_text_channel(name, category=category_channel)
+        deck = Deck(id=self.generate_new_id(), manager=manager, name=name, category_channel=category_channel,
+                    default_channel=default_channel, role=role)
+        await asyncio.wait([self.save_deck(deck), manager.add_roles(*roles)])
+        return deck
+
+    async def remove_deck(self, deck: Deck):
+        tasks = [channel.delete() for channel in deck.category_channel.channels]
+        tasks.extend([deck.category_channel.delete(), deck.role.delete()])
+        del self.decks[deck.category_channel.id]
+        remove_manager_role = True
+        for d in self.decks.values():
+            if deck.manager == d.manager:
+                remove_manager_role = False
+        if remove_manager_role:
+            tasks.append(deck.manager.remove_roles(self.manager_role))
+        await asyncio.wait(tasks)
+
     def get_deck_by_channel(self, channel: GuildChannel):
         if isinstance(channel, TextChannel) or isinstance(channel, VoiceChannel):
             return self.decks.get(channel.category_id)
@@ -201,6 +228,22 @@ class DeckHandler:
 
     def is_valid_id(self, id_: str):
         return match(self.VALID_ID_REGEX, id_) is not None
+
+    def generate_new_id(self) -> str:
+        def generate() -> str:
+            string = Deck.VALID_ID
+            result = ''
+            for i in range(Deck.ID_LENGTH):
+                result += choice(string)
+
+            return result
+
+        while True:
+            id_ = generate()
+            if self.get_deck_by_id(id_) is None:
+                break
+
+        return id_
 
 
 class DeckConverter(Converter):

@@ -30,7 +30,7 @@ def brief_cog(cog: Cog):
 
 
 def brief_group(group: CustomGroup):
-    brief = '\\* `' + group.qualified_name + '`'
+    brief = '* `' + group.qualified_name + '`'
     if group.brief is not None:
         brief += ': ' + group.brief
     for command in group.commands:
@@ -46,7 +46,7 @@ def brief_group(group: CustomGroup):
 def brief_command(command: Command):
     if isinstance(command, CustomGroup):
         return brief_group(command)
-    brief = '\\* `' + command.qualified_name + '`'
+    brief = '* `' + command.qualified_name + '`'
     if command.brief is not None:
         brief += ': ' + command.brief
     return brief
@@ -204,7 +204,7 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
         embeds.set_thumbnail(url=self.client.user.avatar_url)
         if isinstance(command, CustomGroup):
             embeds.add_field(name=literals('send_command_help')['subcommand'],
-                             value=f'```\n{brief_group(command)}\n```')
+                             value=f'\n{brief_group(command)}\n')
         for check in command.checks:
             data = get_check(check.name)
             if data is None:

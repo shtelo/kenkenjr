@@ -89,7 +89,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
     def __init__(self, client: Bot):
         super().__init__(client)
         self.client: Bot = client
-        self.regulation: FreshData = None
+        self.regulation: Optional[FreshData] = None
         self.deck_handler: DeckHandler = DeckHandler(client)
 
     def fetch_regulation(self):
