@@ -58,9 +58,9 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         deck_members = list()
         async for member in self.deck_handler.guild.fetch_members():
             if deck_role in member.roles:
-                deck_members.append('@' + str(member))
+                deck_members.append(str(member))
         deck_embed.set_thumbnail(url=deck.manager.avatar_url)
-        deck_embed.add_field(name=literal['manager'], value='@' + str(deck.manager))
+        deck_embed.add_field(name=literal['manager'], value=str(deck.manager))
         if deck.public:
             deck_embed.add_field(name=literal['public_name'], value=literal['public_value'])
         if deck.nsfw:
