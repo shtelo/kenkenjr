@@ -144,17 +144,27 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
             try:
                 reaction, _ = await self.client.wait_for('reaction_add', check=is_reaction, timeout=PROFILE_TIMEOUT)
             except asyncio.TimeoutError:
-                await message.clear_reaction(DETAIL_EMOJI)
-                await message.clear_reaction(FOLD_EMOJI)
+                if ctx.guild is not None:
+                    await message.clear_reaction(DETAIL_EMOJI)
+                    await message.clear_reaction(FOLD_EMOJI)
+                else:
+                    await message.remove_reaction(DETAIL_EMOJI, self.client.user)
+                    await message.remove_reaction(FOLD_EMOJI, self.client.user)
                 break
             else:
                 if reaction.emoji == DETAIL_EMOJI:
                     await message.edit(embed=get_profile_embed(user, False))
-                    await message.clear_reaction(DETAIL_EMOJI)
+                    if ctx.guild is not None:
+                        await message.clear_reaction(DETAIL_EMOJI)
+                    else:
+                        await message.remove_reaction(DETAIL_EMOJI, self.client.user)
                     await message.add_reaction(FOLD_EMOJI)
                 else:
                     await message.edit(embed=get_profile_embed(user))
-                    await message.clear_reaction(FOLD_EMOJI)
+                    if ctx.guild is not None:
+                        await message.clear_reaction(FOLD_EMOJI)
+                    else:
+                        await message.remove_reaction(FOLD_EMOJI, self.client.user)
                     await message.add_reaction(DETAIL_EMOJI)
 
     @modules.command(name='거리두기', aliases=('사회적거리두기', '안전거리'))
