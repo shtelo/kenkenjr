@@ -1,4 +1,4 @@
-from .custom_bot import Kenken
+from .custom_bot import CustomBot
 from .custom_cog import CustomCog
 from .custom_cooldowns import SharedCooldown, SharedCooldownMapping
 from .custom_core import CustomGroupMixin, CustomGroup, CustomCommand, command, group, shared_cooldown, owner_only, \

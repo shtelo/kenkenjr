@@ -9,7 +9,7 @@ from utils import get_path, get_constant, Log, singleton
 
 
 @singleton
-class Kenken(Bot):
+class CustomBot(Bot):
     def __init__(self, args: list):
         super().__init__([get_constant('default_prefix')])
         self.load_all_extensions()
@@ -46,6 +46,3 @@ class Kenken(Bot):
         for extension in self.extensions.keys():
             done = done and self.reload_extension(extension)
         return done
-
-    def group(self, *args, **kwargs):
-        pass

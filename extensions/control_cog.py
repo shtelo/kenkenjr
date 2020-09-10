@@ -3,7 +3,7 @@ from discord.ext.commands import Context
 
 import modules
 from modules import CustomCog, owner_only, guild_only, partner_only
-from modules.custom.custom_bot import Kenken
+from modules.custom.custom_bot import CustomBot
 from utils import get_cog, literals, reload_literals, Log
 
 
@@ -12,9 +12,9 @@ class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):
     봇의 관리와 직결되는 기능들을 포함합니다.
     """
 
-    def __init__(self, client: Kenken):
+    def __init__(self, client: CustomBot):
         super().__init__(client)
-        self.client: Kenken = client
+        self.client: CustomBot = client
 
     @modules.group(name='테스트', aliases=('test', 't'))
     @owner_only()
@@ -70,5 +70,5 @@ class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):
                 await message.edit(content=(literals('reload_cogs')['failed']))
 
 
-def setup(client: Kenken):
+def setup(client: CustomBot):
     client.add_cog(ControlCog(client))

@@ -213,7 +213,8 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             finally:
                 await message.delete()
         if deck.auto:
-            tasks = [ctx.send(literal['done'] % deck.name), author.add_roles(deck.role)]
+            tasks = [ctx.send(literal['done'] % (ctx.author.mention, deck.name)), author.add_roles(deck.role),
+                     deck.manager.send(literal['done'] % (ctx.author, deck.name))]
             await asyncio.wait(tasks)
         elif ctx.author.id in [member.id for member in deck.pending]:
             await ctx.send(literal['already_applied'])
