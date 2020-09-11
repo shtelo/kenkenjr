@@ -60,6 +60,11 @@ def get_guild_profile_embed(guild: Guild, brief: bool = True):
                                   value='\n'.join([str(member) for member in online_members]))
         guild_embed.set_footer(text=f'{guild.created_at} · {guild.id}')
         guild_embed.set_image(url=guild.splash_url)
+        if guild.channels:
+            value = literal['category'] % len(guild.categories)
+            value += '\n' + literal['text_channel'] % len(guild.text_channels)
+            value += '\n' + literal['voice_channel'] % len(guild.voice_channels)
+            guild_embed.add_field(name=literal['channel'] % len(guild.channels), value=value)
     return guild_embed
 
 
