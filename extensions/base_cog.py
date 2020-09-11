@@ -26,6 +26,7 @@ def get_profile_embed(user: User, brief: bool = True):
     if isinstance(user, Member):
         profile_embed.set_author(name=user.guild.name + ' ' + user.top_role.name, icon_url=user.guild.icon_url)
     if not brief:
+        profile_embed.set_image(url=user.avatar_url)
         profile_embed.set_footer(text=f'{user.created_at} · {user.id}')
         if isinstance(user, Member):
             profile_embed.add_field(name=literal['join'], value=user.joined_at)
