@@ -9,15 +9,12 @@ from discord.ext.commands import Context, Bot, MemberConverter, BadArgument
 
 import modules
 from modules import CustomCog, tokens_len, ChainedEmbed, guild_only
-from utils import get_cog, get_path, Log, literals, get_emoji
+from utils import get_cog, get_path, Log, literals, get_emoji, attach_toggle_interface, InterfaceState
 
 NICK_MAX_LENGTH = 32
 
 DETAIL_EMOJI = get_emoji(':question_mark:')
 FOLD_EMOJI = get_emoji(':x:')
-
-PROFILE_TIMEOUT = 60
-
 
 def get_profile_embed(user: User, brief: bool = True):
     literal = literals('get_profile_embed')
@@ -140,38 +137,10 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
                 pass
         profile_embed = get_profile_embed(user)
         message = await ctx.send(embed=profile_embed)
-        await message.add_reaction(DETAIL_EMOJI)
-
-        def is_reaction(reaction_: Reaction, user_: User):
-            return user_ != self.client.user and reaction_.message.id == message.id \
-                   and (reaction_.emoji == DETAIL_EMOJI or reaction_.emoji == FOLD_EMOJI)
-
-        while True:
-            try:
-                reaction, _ = await self.client.wait_for('reaction_add', check=is_reaction, timeout=PROFILE_TIMEOUT)
-            except asyncio.TimeoutError:
-                if ctx.guild is not None:
-                    await message.clear_reaction(DETAIL_EMOJI)
-                    await message.clear_reaction(FOLD_EMOJI)
-                else:
-                    await message.remove_reaction(DETAIL_EMOJI, self.client.user)
-                    await message.remove_reaction(FOLD_EMOJI, self.client.user)
-                break
-            else:
-                if reaction.emoji == DETAIL_EMOJI:
-                    await message.edit(embed=get_profile_embed(user, False))
-                    if ctx.guild is not None:
-                        await message.clear_reaction(DETAIL_EMOJI)
-                    else:
-                        await message.remove_reaction(DETAIL_EMOJI, self.client.user)
-                    await message.add_reaction(FOLD_EMOJI)
-                else:
-                    await message.edit(embed=get_profile_embed(user))
-                    if ctx.guild is not None:
-                        await message.clear_reaction(FOLD_EMOJI)
-                    else:
-                        await message.remove_reaction(FOLD_EMOJI, self.client.user)
-                    await message.add_reaction(DETAIL_EMOJI)
+        await attach_toggle_interface(
+            self.client, message,
+            InterfaceState(FOLD_EMOJI, message.edit, embed=get_profile_embed(user)),
+            InterfaceState(DETAIL_EMOJI, message.edit, embed=get_profile_embed(user, False)))
 
     @modules.command(name='거리두기', aliases=('사회적거리두기', '안전거리'))
     @guild_only()
@@ -202,28 +171,10 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
     @guild_only()
     async def guild_profile(self, ctx: Context):
         message = await ctx.send(embed=get_guild_profile_embed(ctx.guild))
-        await message.add_reaction(DETAIL_EMOJI)
-
-        def is_reaction(reaction_: Reaction, user_: User):
-            return user_ != self.client.user and reaction_.message.id == message.id \
-                   and (reaction_.emoji == DETAIL_EMOJI or reaction_.emoji == FOLD_EMOJI)
-
-        while True:
-            try:
-                reaction, _ = await self.client.wait_for('reaction_add', check=is_reaction, timeout=PROFILE_TIMEOUT)
-            except asyncio.TimeoutError:
-                await message.clear_reaction(DETAIL_EMOJI)
-                await message.clear_reaction(FOLD_EMOJI)
-                break
-            else:
-                if reaction.emoji == DETAIL_EMOJI:
-                    await message.edit(embed=get_guild_profile_embed(ctx.guild, False))
-                    await message.clear_reaction(DETAIL_EMOJI)
-                    await message.add_reaction(FOLD_EMOJI)
-                else:
-                    await message.edit(embed=get_guild_profile_embed(ctx.guild))
-                    await message.clear_reaction(FOLD_EMOJI)
-                    await message.add_reaction(DETAIL_EMOJI)
+        await attach_toggle_interface(
+            self.client, message,
+            InterfaceState(FOLD_EMOJI, message.edit, embed=get_guild_profile_embed(ctx.guild)),
+            InterfaceState(DETAIL_EMOJI, message.edit, embed=get_guild_profile_embed(ctx.guild, False)))
 
     # TODO add command about color pickers
 

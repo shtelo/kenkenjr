@@ -1,15 +1,15 @@
 import asyncio
-from random import choice
-from typing import Coroutine
+from typing import Coroutine, Union
 
 import discord
-from discord import Member, Reaction, User, Role, Message, PermissionOverwrite, TextChannel
+from discord import Member, Reaction, User, Role, Message, VoiceChannel, TextChannel
 from discord.abc import GuildChannel
 from discord.ext.commands import Bot, Context, BadArgument, check, BucketType, MemberConverter
 
 import modules
-from modules import CustomCog, ChainedEmbed, shared_cooldown, DeckHandler, Deck, DeckConverter, guild_only, partner_only
-from utils import get_cog, literals, get_emoji, wrap_codeblock, get_constant, check_length
+from modules import CustomCog, ChainedEmbed, shared_cooldown, DeckHandler, Deck, DeckConverter, guild_only
+from utils import get_cog, literals, get_emoji, wrap_codeblock, get_constant, check_length, attach_toggle_interface, \
+    InterfaceState
 
 FAILED_EMOJI = get_emoji(':negative_squared_cross_mark:')
 CONFIRM_EMOJI = get_emoji(':white_check_mark:')
@@ -18,6 +18,8 @@ NSFW_EMOJI = get_emoji(':underage:')
 NSFW_TIMEOUT = 60
 DECK_START_TIMEOUT = 60
 DECK_END_TIMEOUT = 30
+
+CHANNEL_DELETE_DELAY = 120
 
 deck_cooldown = shared_cooldown(1, 60, BucketType.category)
 
@@ -50,8 +52,9 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         super().__init__(client)
         self.client: Bot = client
         self.deck_handler: DeckHandler = DeckHandler(client)
+        self.pending_delete: list = list()
 
-    async def get_deck_embed(self, deck: Deck) -> ChainedEmbed:
+    async def get_deck_embed(self, deck: Deck, brief: bool = True) -> ChainedEmbed:
         literal = literals('get_deck_embed')
         deck_embed = ChainedEmbed(title=literal['title'] % deck.name, description=deck.topic)
         deck_role = discord.utils.get(await self.deck_handler.guild.fetch_roles(), name=deck.name)
@@ -72,8 +75,16 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         if deck.pending:
             deck_embed.add_field(name=literal['pending'] % len(deck.pending),
                                  value=' '.join([str(member) for member in deck.pending]))
-        if deck_members:
-            deck_embed.add_field(name=literal['members'] % len(deck_members), value='\n'.join(deck_members))
+        if not brief:
+            if deck_members:
+                deck_embed.add_field(name=literal['members'] % len(deck_members), value='\n'.join(deck_members),
+                                     inline=True)
+            channels = list()
+            for channel in deck.category_channel.channels:
+                channels.append((literal['voice'] if isinstance(channel, VoiceChannel) else '')
+                                + (channel.name if channel != deck.default_channel else f'**__{channel.name}__**'))
+            deck_embed.add_field(name=literal['channels'] % len(deck.category_channel.channels),
+                                 value='\n'.join(channels), inline=True)
         deck_embed.set_footer(text=literal['id'] % deck.id)
         return deck_embed
 
@@ -172,7 +183,11 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             if (deck := self.deck_handler.get_deck_by_channel(ctx.channel)) is None:
                 await self.deck_list(ctx)
                 return
-        await ctx.send(embed=await self.get_deck_embed(deck))
+        message = await ctx.send(embed=await self.get_deck_embed(deck))
+        await attach_toggle_interface(
+            self.client, message,
+            InterfaceState(get_emoji(':x:'), message.edit, embed=await self.get_deck_embed(deck)),
+            InterfaceState(get_emoji(':question_mark:'), message.edit, embed=await self.get_deck_embed(deck, False)))
 
     @deck_.command(name='목록', aliases=('리스트', '전체'))
     @wait_until_deck_handler_ready()
@@ -241,7 +256,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             ctx.command.reset_cooldown(ctx)
             return
         if not members:
-            members = deck.pending
+            members = deck.pending_delete
         await self.accept_joining(ctx, deck, *members)
 
     @deck_.command(name='거절', aliases=('거부', '기각'))
@@ -422,12 +437,71 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             await asyncio.wait([partner_channel.send(literal['pending'].format(deck.name)),
                                 ctx.send(literal['applied'] % deck.name)])
 
-    # TODO: code up the commands below
-    # @deck_.group(name='설정')
-    # @partner_only()
-    # @wait_until_deck_handler_ready()
-    # async def deck_setting(self, ctx: Context):
-    #     pass
+    @modules.group(name='채널')
+    @guild_only()
+    @wait_until_deck_handler_ready()
+    async def channel(self, ctx: Context, *, deck: DeckConverter = None):
+        await self.deck_info(ctx, deck)
+
+    @channel.group(name='생성', aliases=('추가', '개설'))
+    @guild_only()
+    @wait_until_deck_handler_ready()
+    async def channel_create(self, ctx: Context, *, name: str):
+        await self.channel_create_text(ctx, name=name)
+
+    @channel_create.command(name='텍스트', aliases=('기본', '일반'))
+    @guild_only()
+    @wait_until_deck_handler_ready()
+    async def channel_create_text(self, ctx: Context, *, name: str):
+        literal = literals('channel_create_text')
+        deck: Deck = await DeckConverter().convert(ctx, str(ctx.channel.id))
+        check_deck_manager(deck, ctx.author)
+        channel = await deck.category_channel.create_text_channel(name)
+        await ctx.send(literal['done'] % channel.mention)
+
+    @channel_create.command(name='음성', aliases=('보이스', '통화'))
+    @guild_only()
+    @wait_until_deck_handler_ready()
+    async def channel_create_voice(self, ctx: Context, *, name: str):
+        literal = literals('channel_create_voice')
+        deck: Deck = await DeckConverter().convert(ctx, str(ctx.channel.id))
+        check_deck_manager(deck, ctx.author)
+        channel = await deck.category_channel.create_voice_channel(name)
+        await ctx.send(literal['done'] % channel.mention)
+
+    @channel.group(name='삭제', aliases=('제거', '폐쇄'))
+    @guild_only()
+    @wait_until_deck_handler_ready()
+    async def channel_delete(self, ctx: Context, *, channel: Union[TextChannel, VoiceChannel] = None):
+        literal = literals('channel_delete')
+        if channel is None:
+            channel = ctx.channel
+        deck: Deck = await DeckConverter().convert(ctx, str(channel.id))
+        if channel == deck.default_channel:
+            await ctx.send(literal['failed'])
+            raise BadArgument('default channel of deck is not removable')
+        check_deck_manager(deck, ctx.author)
+        await asyncio.wait([channel.send(literal['pending'] % (CHANNEL_DELETE_DELAY, channel.name)),
+                            ctx.send(literal['done'] % (channel.mention, channel.name))])
+        self.pending_delete.append(channel)
+        await asyncio.sleep(CHANNEL_DELETE_DELAY)
+        if channel in self.pending_delete:
+            await channel.delete()
+
+    @channel_delete.command(name='취소')
+    @guild_only()
+    @wait_until_deck_handler_ready()
+    async def channel_delete_cancel(self, ctx: Context, *, channel: Union[TextChannel, VoiceChannel] = None):
+        literal = literals('channel_delete_cancel')
+        if channel is None:
+            channel = ctx.channel
+        deck: Deck = await DeckConverter().convert(ctx, str(channel.id))
+        check_deck_manager(deck, ctx.author)
+        if channel in self.pending_delete:
+            self.pending_delete.remove(channel)
+            await ctx.send(literal['done'] % channel.mention)
+        else:
+            raise BadArgument(f'pending delete of channel "{channel}" is not found')
 
 
 def setup(client: Bot):

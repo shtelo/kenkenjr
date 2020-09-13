@@ -228,7 +228,11 @@
     ":sunny:": "☀️",
     ":tada:": "\uD83C\uDF89",
     ":x:": "❌",
-    ":hash:": "#️⃣"
+    ":hash:": "#️⃣",
+    ":page_with_curl:": "\uD83D\uDCC3",
+    ":loud_sound:": "\uD83D\uDD0A",
+    ":star:": "⭐",
+    ":open_file_folder:": "\uD83D\uDCC2"
   },
   "send_command_help": {
     "subcommand": "\uD83D\uDCD7 하위 명령어"
@@ -424,7 +428,7 @@
   "get_deck_embed": {
     "title": "__%s__ 데크",
     "manager": "\uD83C\uDFC5 매니저",
-    "members": "\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC67 멤버(총원 %s명)",
+    "members": "\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC67 멤버 **%s**명",
     "id": "id: %s",
     "public_name": "✅ 공식 데크",
     "public_value": "이 데크는 파트너단에 의해 운영되는 데크입니다.",
@@ -434,7 +438,9 @@
     "auto_value": "이 데크는 가입신청을 자동으로 수락합니다.",
     "lock_name": "\uD83D\uDD12 잠긴 데크",
     "lock_value": "이 데크에는 가입신청을 전송할 수 없습니다.",
-    "pending": "✋ %s명의 가입신청자"
+    "pending": "✋ 가입신청자 **%s**명",
+    "channels": "\uD83D\uDCC2 채널 **%s**개",
+    "voice": "\uD83D\uDD0A "
   },
   "deck_join": {
     "already_done": "이미 이 데크에 가입돼있어!",
@@ -521,5 +527,19 @@
     "category": "카테고리 **%s**개",
     "text_channel": "텍스트 채널 **%s**개",
     "voice_channel": "음성 채널 **%s**개"
+  },
+  "channel_create_text": {
+    "done": "%s 채널을 만들었어!"
+  },
+  "channel_create_voice": {
+    "done": "%s 채널을 만들었어!"
+  },
+  "channel_delete": {
+    "failed": "데크의 기본 채널은 삭제할 수 없어!",
+    "done": "%s 채널 삭제가 예약됐어! 삭제를 취소하려면 `<P>채널 삭제 취소 %s`이렇게 해봐!",
+    "pending": "**__이 채널은 %s초 뒤에 삭제될 예정이야!!!__**\n삭제를 취소하려면 `<P>채널 삭제 취소 %s`이렇게 해봐!"
+  },
+  "channel_delete_cancel": {
+    "done": "%s 채널의 삭제가 취소됐어!"
   }
 }
