@@ -2,7 +2,7 @@ import asyncio
 from typing import List
 
 from discord import Reaction, User
-from discord.ext.commands import Context, Cog, Command, Bot
+from discord.ext.commands import Context, Cog, Command, Bot, BadArgument
 
 import modules
 from modules import CustomCog, ChainedEmbed, CustomGroup
@@ -52,6 +52,13 @@ def brief_command(command: Command):
     return brief
 
 
+def get_command_default_signature(command: Command):
+    return (get_constant('default_prefix')
+            + (command.full_parent_name + ' ' if command.full_parent_name else '')
+            + command.name + ' '
+            + command.signature).rstrip()
+
+
 def get_command_signature(command: Command):
     parent = command.full_parent_name
     if len(command.aliases) > 0:
@@ -65,7 +72,7 @@ def get_command_signature(command: Command):
     return ('%s%s %s' % (get_constant('default_prefix'), alias, command.signature)).rstrip()
 
 
-def get_command_info(command: Command):
+def stringify_command(command: Command):
     signature = '`' + get_command_signature(command) + '`\n'
     info = ''
     if command.brief is not None:
@@ -77,7 +84,7 @@ def get_command_info(command: Command):
 
 def check_correlation(command: Command, keywords: List[str], embed: ChainedEmbed):
     found = 0
-    command_info = get_command_info(command)
+    command_info = stringify_command(command)
     for keyword in keywords:
         if keyword in command_info:
             embed.add_field(name=command.qualified_name, value=command_info)
@@ -132,6 +139,8 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
             await self.send_command_help(ctx, command)
         elif cog is not None:
             await self.send_cog_info(ctx, cog)
+        else:
+            raise BadArgument(f'command "{command_name}" is not found')
 
     async def send_cog_info(self, ctx: Context, cog: Cog):
         cog_name = cog.qualified_name
@@ -193,13 +202,14 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
 
     async def send_command_help(self, ctx: Context, command: Command):
         command_name = command.qualified_name
-        signature = get_command_signature(command)
+        default_signature = get_command_default_signature(command)
+        footer = get_command_signature(command)
         description = ''
         if command.help is not None:
             description = command.help + '\n'
         elif command.brief is not None:
             description = command.brief + '\n'
-        description += f'`{signature}`'
+        description += f'`{default_signature}`'
         embeds = ChainedEmbed(title=get_constant('default_prefix') + command_name, description=description)
         embeds.set_thumbnail(url=self.client.user.avatar_url)
         if isinstance(command, CustomGroup):
@@ -211,10 +221,11 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
                 continue
             embeds.add_field(name=f'{data["emoji"]} {data["name"]}', value=data["description"])
         if command.cog is not None:
-            text = command.cog.qualified_name
+            category = command.cog.qualified_name
             if isinstance(command.cog, CustomCog):
-                text = command.cog.emoji + ' ' + text
-            embeds.set_footer(text=text)
+                category = command.cog.emoji + ' ' + category
+            footer += ' · ' + category
+        embeds.set_footer(text=footer)
         for embed in embeds.to_list():
             await ctx.send(embed=embed)
 
