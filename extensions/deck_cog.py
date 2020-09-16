@@ -256,7 +256,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             ctx.command.reset_cooldown(ctx)
             return
         if not members:
-            members = deck.pending_delete
+            members = deck.pending
         await self.accept_joining(ctx, deck, *members)
 
     @deck_.command(name='거절', aliases=('거부', '기각'))
