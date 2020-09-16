@@ -6,7 +6,7 @@ from discord.ext.commands import Context, Cog, Command, Bot, BadArgument
 
 import modules
 from modules import CustomCog, ChainedEmbed, CustomGroup
-from utils import get_cog, get_constant, literals, get_check, get_emoji
+from utils import get_cog, get_constant, literals, get_check, get_emoji, State, attach_page_interface
 
 COMMANDS_TIMEOUT = 60
 
@@ -154,51 +154,22 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
 
     async def send_cog_list(self, ctx: Context):
         literal = literals('send_cog_list')
-        embed = ChainedEmbed(title=literal['title'],
-                             description=literal['description'])
-        embed.set_thumbnail(url=self.client.user.avatar_url)
-        pages = dict()
-        page = 0
-        for cog_name, cog in self.client.cogs.items():
-            name = cog_name
+        pages = list()
+        count = len(self.client.cogs)
+        message = None
+        for i, cog in enumerate(sorted(self.client.cogs.items(),
+                                       key=lambda item: get_cog(type(item[1]).__name__)['priority'])):
+            name, cog = cog
             if isinstance(cog, CustomCog):
                 name = cog.emoji + ' ' + name
-            pages[get_cog(type(cog).__name__)['priority']] = (name, brief_cog(cog))
-        embed.add_field(name=pages[page][0], value=pages[page][1])
-        embed.set_footer(text=literal['footer'] % (page + 1, len(pages)))
-        message = await ctx.send(embed=embed)
-        prev_emoji = get_emoji(':arrow_left:')
-        next_emoji = get_emoji(':arrow_right:')
-        done_emoji = get_emoji(':white_check_mark:')
-        emojis = (prev_emoji, next_emoji, done_emoji)
-        await message.add_reaction(prev_emoji)
-        await message.add_reaction(done_emoji)
-        await message.add_reaction(next_emoji)
-
-        def is_reaction(reaction_: Reaction, user_: User):
-            return reaction_.message.id == message.id and user_.id == ctx.author.id and reaction_.emoji in emojis
-
-        while True:
-            try:
-                reaction, user = await self.client.wait_for('reaction_add', check=is_reaction, timeout=COMMANDS_TIMEOUT)
-                if reaction.emoji == done_emoji:
-                    break
-                else:
-                    embed.clear_fields()
-                    if reaction.emoji == prev_emoji:
-                        page = (page - 1) % len(pages)
-                    elif reaction.emoji == next_emoji:
-                        page = (page + 1) % len(pages)
-                    embed.add_field(name=pages[page][0], value=pages[page][1])
-                    embed.set_footer(text=literal['footer'] % (page + 1, len(pages)))
-                    await message.edit(embed=embed)
-            except asyncio.TimeoutError:
-                break
-            finally:
-                await asyncio.wait([message.remove_reaction(prev_emoji, ctx.author),
-                                    message.remove_reaction(next_emoji, ctx.author)])
-        await asyncio.wait([message.clear_reaction(prev_emoji),
-                            message.clear_reaction(next_emoji)])
+            page_embed = ChainedEmbed(title=literal['title'], description=literal['description'])
+            page_embed.set_thumbnail(url=self.client.user.avatar_url)
+            page_embed.add_field(name=name, value=brief_cog(cog))
+            page_embed.set_footer(text=literal['footer'] % (i + 1, count))
+            if message is None:
+                message = await ctx.send(embed=page_embed)
+            pages.append(State(callback=message.edit, embed=page_embed))
+        await attach_page_interface(self.client, message, pages, ctx.author)
 
     async def send_command_help(self, ctx: Context, command: Command):
         command_name = command.qualified_name
