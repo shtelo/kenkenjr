@@ -12,14 +12,14 @@ PAGE_NEXT_EMOJI = get_emoji(':arrow_right:')
 PAGE_PREV_EMOJI = get_emoji(':arrow_left:')
 
 
-class State:
+class InterfaceState:
     def __init__(self, callback, *args, **kwargs):
         self.callback = callback
         self.args = args
         self.kwargs = kwargs
 
 
-class EmojiState(State):
+class EmojiInterfaceState(InterfaceState):
     def __init__(self, emoji: str, callback, *args, **kwargs):
         super().__init__(callback, *args, **kwargs)
         self.emoji = emoji
@@ -32,12 +32,12 @@ def check_reaction(bot: Client, message: Message, user: User, emojis: Sequence):
     return check
 
 
-async def update_state(message: Message, state: State):
+async def update_state(message: Message, state: InterfaceState):
     await asyncio.wait([try_to_clear_reactions(message), state.callback(*state.args, **state.kwargs)])
 
 
-async def attach_toggle_interface(bot: Bot, message: Message, primary_state: EmojiState, secondary_state: EmojiState,
-                                  user: User = None, timeout=DEFAULT_TIMEOUT):
+async def attach_toggle_interface(bot: Bot, message: Message, primary_state: EmojiInterfaceState,
+                                  secondary_state: EmojiInterfaceState, user: User = None, timeout=DEFAULT_TIMEOUT):
     await message.add_reaction(secondary_state.emoji)
     while True:
         try:

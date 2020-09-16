@@ -9,7 +9,7 @@ from discord.ext.commands import Bot, Context, BadArgument, check, BucketType, M
 import modules
 from modules import CustomCog, ChainedEmbed, shared_cooldown, DeckHandler, Deck, DeckConverter, guild_only
 from utils import get_cog, literals, get_emoji, wrap_codeblock, get_constant, check_length, attach_toggle_interface, \
-    EmojiState
+    EmojiInterfaceState
 
 FAILED_EMOJI = get_emoji(':negative_squared_cross_mark:')
 CONFIRM_EMOJI = get_emoji(':white_check_mark:')
@@ -186,8 +186,8 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         message = await ctx.send(embed=await self.get_deck_embed(deck))
         await attach_toggle_interface(
             self.client, message,
-            EmojiState(get_emoji(':x:'), message.edit, embed=await self.get_deck_embed(deck)),
-            EmojiState(get_emoji(':question_mark:'), message.edit, embed=await self.get_deck_embed(deck, False)))
+            EmojiInterfaceState(get_emoji(':x:'), message.edit, embed=await self.get_deck_embed(deck)),
+            EmojiInterfaceState(get_emoji(':question_mark:'), message.edit, embed=await self.get_deck_embed(deck, False)))
 
     @deck_.command(name='목록', aliases=('리스트', '전체'))
     @wait_until_deck_handler_ready()

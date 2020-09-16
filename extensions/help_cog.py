@@ -6,7 +6,7 @@ from discord.ext.commands import Context, Cog, Command, Bot, BadArgument
 
 import modules
 from modules import CustomCog, ChainedEmbed, CustomGroup
-from utils import get_cog, get_constant, literals, get_check, get_emoji, State, attach_page_interface
+from utils import get_cog, get_constant, literals, get_check, get_emoji, InterfaceState, attach_page_interface
 
 COMMANDS_TIMEOUT = 60
 
@@ -154,7 +154,7 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
 
     async def send_cog_list(self, ctx: Context):
         literal = literals('send_cog_list')
-        pages = list()
+        states = list()
         count = len(self.client.cogs)
         message = None
         for i, cog in enumerate(sorted(self.client.cogs.items(),
@@ -168,8 +168,8 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
             page_embed.set_footer(text=literal['footer'] % (i + 1, count))
             if message is None:
                 message = await ctx.send(embed=page_embed)
-            pages.append(State(callback=message.edit, embed=page_embed))
-        await attach_page_interface(self.client, message, pages, ctx.author)
+            states.append(InterfaceState(callback=message.edit, embed=page_embed))
+        await attach_page_interface(self.client, message, states, ctx.author)
 
     async def send_command_help(self, ctx: Context, command: Command):
         command_name = command.qualified_name

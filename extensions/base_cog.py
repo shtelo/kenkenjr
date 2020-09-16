@@ -9,7 +9,7 @@ from discord.ext.commands import Context, Bot, MemberConverter, BadArgument
 
 import modules
 from modules import CustomCog, tokens_len, ChainedEmbed, guild_only
-from utils import get_cog, get_path, Log, literals, get_emoji, attach_toggle_interface, EmojiState
+from utils import get_cog, get_path, Log, literals, get_emoji, attach_toggle_interface, EmojiInterfaceState
 
 NICK_MAX_LENGTH = 32
 
@@ -139,8 +139,8 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         message = await ctx.send(embed=profile_embed)
         await attach_toggle_interface(
             self.client, message,
-            EmojiState(FOLD_EMOJI, message.edit, embed=get_profile_embed(user)),
-            EmojiState(DETAIL_EMOJI, message.edit, embed=get_profile_embed(user, False)))
+            EmojiInterfaceState(FOLD_EMOJI, message.edit, embed=get_profile_embed(user)),
+            EmojiInterfaceState(DETAIL_EMOJI, message.edit, embed=get_profile_embed(user, False)))
 
     @modules.command(name='거리두기', aliases=('사회적거리두기', '안전거리'))
     @guild_only()
@@ -173,8 +173,8 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         message = await ctx.send(embed=get_guild_profile_embed(ctx.guild))
         await attach_toggle_interface(
             self.client, message,
-            EmojiState(FOLD_EMOJI, message.edit, embed=get_guild_profile_embed(ctx.guild)),
-            EmojiState(DETAIL_EMOJI, message.edit, embed=get_guild_profile_embed(ctx.guild, False)))
+            EmojiInterfaceState(FOLD_EMOJI, message.edit, embed=get_guild_profile_embed(ctx.guild)),
+            EmojiInterfaceState(DETAIL_EMOJI, message.edit, embed=get_guild_profile_embed(ctx.guild, False)))
 
     # TODO add command about color pickers
 

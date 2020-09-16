@@ -1,10 +1,12 @@
 from datetime import datetime
+from typing import Optional
 
 from discord.ext.commands import Bot, Context, BucketType
 
 import modules
 from modules import CustomCog, sheet_read, ChainedEmbed, doc_read, shared_cooldown, DeckHandler
-from utils import get_cog, literals, wrap_codeblock, get_constant, FreshData, get_emoji
+from utils import get_cog, literals, wrap_codeblock, get_constant, FreshData, get_emoji, InterfaceState, \
+    attach_page_interface
 
 TIMESTAMP = 0
 EMAIL = 1
@@ -102,58 +104,33 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         return paragraphs
 
     @modules.group(name='가입신청서', aliases=('가입', '신청서'))
-    async def applications(self, ctx: Context):
+    async def applications(self, ctx: Context, *query: str):
         literal = literals('applications')
-        message = await ctx.send(literal['start'])
+        start_message = await ctx.send(literal['start'])
+        message = None
         _, replies = get_application_sheet()
-        count = len(replies)
-        for reply in replies:
-            if reply[STATE] and reply[STATE] != STATE_RECEIVED:
-                count -= 1
-                continue
-            embeds = get_application_embed(reply)
-            for embed in embeds.to_list():
-                await ctx.author.send(embed=embed)
-        await message.edit(content=literal['done'] % count if count else literal['not_found'])
+        query = tuple({q for q in query if q in (STATE_RECEIVED, STATE_APPROVED, STATE_REJECTED)})
+        if not query:
+            query = (STATE_RECEIVED,)
+        queried = [reply for reply in replies if not reply[STATE] or reply[STATE] in query]
+        count = len(queried)
+        states = list()
+        for i, reply in enumerate(reversed(queried)):
+            reply_embed = get_application_embed(reply)
+            reply_embed.set_footer(text=literal['footer'] % (i + 1, count))
+            if message is None:
+                await start_message.edit(content=literal['done'] % (f'({", ".join(query)})', count),
+                                         embed=reply_embed)
+                message = start_message
+            states.append(InterfaceState(message.edit, embed=reply_embed))
+        if message is None:
+            await start_message.edit(content=literal['not_found'])
+        else:
+            await attach_page_interface(self.client, message, states, ctx.author)
 
     @applications.command(name='전체', aliases=('*',))
     async def applications_all(self, ctx: Context):
-        literal = literals('applications_all')
-        message = await ctx.send(literal['start'])
-        _, replies = get_application_sheet()
-        count = len(replies)
-        for reply in replies:
-            embeds = get_application_embed(reply)
-            for embed in embeds.to_list():
-                await ctx.author.send(embed=embed)
-        await message.edit(content=literal['done'] % count if count else literal['not_found'])
-
-    @applications.group(name='원본')
-    async def application_raw(self, ctx: Context):
-        literal = literals('application_raw')
-        message = await ctx.send(literal['start'])
-        keys, replies = get_application_sheet()
-        count = len(replies)
-        for reply in replies:
-            if reply[STATE] and reply[STATE] != STATE_RECEIVED:
-                count -= 1
-                continue
-            embeds = get_application_raw_embed(keys, reply)
-            for embed in embeds.to_list():
-                await ctx.author.send(embed=embed)
-        await message.edit(content=literal['done'] % count if count else literal['not_found'])
-
-    @application_raw.command(name='전체', aliases=('*',))
-    async def application_raw_all(self, ctx: Context):
-        literal = literals('application_raw_all')
-        message = await ctx.send(literal['start'])
-        keys, replies = get_application_sheet()
-        count = len(replies)
-        for reply in replies:
-            embeds = get_application_raw_embed(keys, reply)
-            for embed in embeds.to_list():
-                await ctx.author.send(embed=embed)
-        await message.edit(content=literal['done'] % count if count else literal['not_found'])
+        await self.applications(ctx, STATE_RECEIVED, STATE_APPROVED, STATE_REJECTED)
 
     @modules.group(name='회칙')
     async def regulation(self, ctx: Context, *, keyword: str = ''):
