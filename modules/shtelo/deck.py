@@ -203,15 +203,17 @@ class DeckHandler:
 
     async def remove_deck(self, deck: Deck):
         tasks = [self.remove_channel(channel, deck) for channel in deck.category_channel.channels]
-        tasks.extend([deck.category_channel.delete(), deck.role.delete()])
+        tasks.extend([deck.role.delete()])
         del self.decks[deck.category_channel.id]
         remove_manager_role = True
         for d in self.decks.values():
             if deck.manager == d.manager:
                 remove_manager_role = False
+                break
         if remove_manager_role:
             tasks.append(deck.manager.remove_roles(self.manager_role))
         await asyncio.wait(tasks)
+        await deck.category_channel.delete()
 
     async def remove_channel(self, channel: Union[TextChannel, VoiceChannel], deck: Deck = None):
         if deck is None:
