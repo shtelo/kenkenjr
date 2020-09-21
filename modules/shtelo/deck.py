@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from random import choice
 from re import match, sub
-from typing import Optional
+from typing import Optional, Union
 
 import discord
 from discord import Guild, Client, TextChannel, CategoryChannel, VoiceChannel, Member, Role, PermissionOverwrite
@@ -11,7 +11,7 @@ from discord.abc import GuildChannel
 from discord.ext.commands import Converter, Context, TextChannelConverter, BadArgument, \
     VoiceChannelConverter, CategoryChannelConverter, CommandError
 
-from utils import singleton
+from utils import singleton, get_constant
 
 
 def mention_to_id(mention: str) -> int:
@@ -88,7 +88,7 @@ class Deck:
 
 @singleton
 class DeckHandler:
-    DELETE_CATEGORY = 757466502202130512
+    RECYCLE_BIN_CATEGORY = 757466502202130512
     MANAGER_ROLE = 650534578880118820
     SHTELO_GUILD = 650533223520010261
 
@@ -110,12 +110,14 @@ class DeckHandler:
         self.manager_role: Optional[Role] = None
         self.decks: Optional[dict] = None
         self.ready: bool = False
+        self.recycle_bin: Optional[CategoryChannel] = None
         client.loop.create_task(self._fetch_all())
 
     async def _fetch_all(self):
         await self.client.wait_until_ready()
         await self._fetch_guild()
         await self._fetch_decks()
+        self.recycle_bin = await self.client.fetch_channel(self.RECYCLE_BIN_CATEGORY)
         self.manager_role = discord.utils.get(await self.guild.fetch_roles(), id=self.MANAGER_ROLE)
         self.ready = True
 
@@ -137,6 +139,7 @@ class DeckHandler:
         for channel in await self.guild.fetch_channels():
             if isinstance(channel, TextChannel) \
                     and channel.category_id is not None \
+                    and channel.category_id != self.RECYCLE_BIN_CATEGORY \
                     and channel.topic is not None \
                     and match(self.ENTIRE_REGEX, channel.topic) is not None:
                 tasks.append(self._fetch_deck(channel))
@@ -199,7 +202,7 @@ class DeckHandler:
         return deck
 
     async def remove_deck(self, deck: Deck):
-        tasks = [channel.delete() for channel in deck.category_channel.channels]
+        tasks = [self.remove_channel(channel, deck) for channel in deck.category_channel.channels]
         tasks.extend([deck.category_channel.delete(), deck.role.delete()])
         del self.decks[deck.category_channel.id]
         remove_manager_role = True
@@ -209,6 +212,11 @@ class DeckHandler:
         if remove_manager_role:
             tasks.append(deck.manager.remove_roles(self.manager_role))
         await asyncio.wait(tasks)
+
+    async def remove_channel(self, channel: Union[TextChannel, VoiceChannel], deck: Deck = None):
+        if deck is None:
+            deck = self.get_deck_by_channel(channel)
+        await channel.edit(name=deck.name + '__' + channel.name, category=self.recycle_bin)
 
     def get_deck_by_channel(self, channel: GuildChannel):
         if isinstance(channel, TextChannel) or isinstance(channel, VoiceChannel):
