@@ -52,7 +52,6 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         super().__init__(client)
         self.client: Bot = client
         self.deck_handler: DeckHandler = DeckHandler(client)
-        self.pending_delete: list = list()
 
     async def get_deck_embed(self, deck: Deck, brief: bool = True) -> ChainedEmbed:
         literal = literals('get_deck_embed')

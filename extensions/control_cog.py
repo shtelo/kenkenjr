@@ -2,9 +2,9 @@ from discord import NotFound, ClientException, Forbidden, HTTPException
 from discord.ext.commands import Context
 
 import modules
-from modules import CustomCog, owner_only, guild_only, partner_only
+from modules import CustomCog, owner_only, guild_only, partner_only, sheet_write
 from modules.custom.custom_bot import CustomBot
-from utils import get_cog, literals, reload_literals, Log
+from utils import get_cog, literals, reload_literals, Log, get_constant
 
 
 class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):
@@ -19,7 +19,7 @@ class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):
     @modules.group(name='테스트', aliases=('test', 't'))
     @owner_only()
     async def test(self, ctx: Context):
-        await ctx.send('테스트!')
+        pass
 
     @modules.command(name='따라해', aliases=('echo', 'e'))
     @partner_only()

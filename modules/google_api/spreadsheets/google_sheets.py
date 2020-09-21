@@ -9,7 +9,12 @@ from googleapiclient.discovery import build
 
 from utils import get_path
 
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+SCOPES = [
+    "https://spreadsheets.google.com/feeds",
+    'https://www.googleapis.com/auth/spreadsheets',
+    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/drive"
+]
 
 
 def get_service():

@@ -83,6 +83,10 @@ def get_application_raw_embed(keys: list, data: list):
     return embeds
 
 
+def append_to_member_list():
+    pass
+
+
 class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
     """
     슈텔로의 관리를 위한 기능을 포함합니다.
