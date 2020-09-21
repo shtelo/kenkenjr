@@ -481,27 +481,8 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             await ctx.send(literal['failed'])
             raise BadArgument('default channel of deck is not removable')
         check_deck_manager(deck, ctx.author)
-        await asyncio.wait([channel.send(literal['pending'] % (CHANNEL_DELETE_DELAY, channel.name)),
-                            ctx.send(literal['done'] % (channel.mention, channel.name))])
-        self.pending_delete.append(channel)
-        await asyncio.sleep(CHANNEL_DELETE_DELAY)
-        if channel in self.pending_delete:
-            await channel.delete()
-
-    @channel_delete.command(name='취소')
-    @guild_only()
-    @wait_until_deck_handler_ready()
-    async def channel_delete_cancel(self, ctx: Context, *, channel: Union[TextChannel, VoiceChannel] = None):
-        literal = literals('channel_delete_cancel')
-        if channel is None:
-            channel = ctx.channel
-        deck: Deck = await DeckConverter().convert(ctx, str(channel.id))
-        check_deck_manager(deck, ctx.author)
-        if channel in self.pending_delete:
-            self.pending_delete.remove(channel)
-            await ctx.send(literal['done'] % channel.mention)
-        else:
-            raise BadArgument(f'pending delete of channel "{channel}" is not found')
+        await ctx.send(literal['done'] % channel.name)
+        await self.deck_handler.remove_channel(channel, deck)
 
 
 def setup(client: Bot):
