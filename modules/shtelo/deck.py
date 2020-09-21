@@ -11,7 +11,7 @@ from discord.abc import GuildChannel
 from discord.ext.commands import Converter, Context, TextChannelConverter, BadArgument, \
     VoiceChannelConverter, CategoryChannelConverter, CommandError
 
-from utils import singleton, get_constant
+from utils import singleton
 
 
 def mention_to_id(mention: str) -> int:
@@ -88,6 +88,10 @@ class Deck:
 
 @singleton
 class DeckHandler:
+    DELETE_CATEGORY = 757466502202130512
+    MANAGER_ROLE = 650534578880118820
+    SHTELO_GUILD = 650533223520010261
+
     MENTION_REGEX = '<@!?\\d+>'
     ID_REGEX = '\\*id: [a-zA-Z0-9]{4,}'
     SETTING_REGEX = '({0}|{1}|{2}|{3})( ({0}|{1}|{2}|{3}))*'\
@@ -112,7 +116,7 @@ class DeckHandler:
         await self.client.wait_until_ready()
         await self._fetch_guild()
         await self._fetch_decks()
-        self.manager_role = discord.utils.get(await self.guild.fetch_roles(), id=get_constant('manager_role'))
+        self.manager_role = discord.utils.get(await self.guild.fetch_roles(), id=self.MANAGER_ROLE)
         self.ready = True
 
     async def wait_until_ready(self):
@@ -120,7 +124,7 @@ class DeckHandler:
             await asyncio.sleep(0.1)
 
     async def _fetch_guild(self):
-        self.guild = await self.client.fetch_guild(get_constant('shtelo_guild'))
+        self.guild = await self.client.fetch_guild(self.SHTELO_GUILD)
 
     async def fetch_decks(self):
         self.ready = False
