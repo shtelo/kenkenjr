@@ -56,7 +56,7 @@ async def update_application(member: Member, state: str, remarks: str, on_error=
         if str(member) in row and row[STATE] != state:
             row[STATE] = state
             if remarks is not None and not row[REMARKS]:
-                row[REMARKS] = remarks.replace('->', '→')
+                row[REMARKS] = str(remarks).replace('->', '→')
             print(row)
             result = row.copy()
             break
