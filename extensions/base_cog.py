@@ -16,6 +16,7 @@ NICK_MAX_LENGTH = 32
 DETAIL_EMOJI = get_emoji(':question_mark:')
 FOLD_EMOJI = get_emoji(':x:')
 
+
 def get_profile_embed(user: User, brief: bool = True):
     literal = literals('get_profile_embed')
     profile_embed = ChainedEmbed(title=user.display_name, color=user.colour, description=str(user))
@@ -36,17 +37,14 @@ def get_profile_embed(user: User, brief: bool = True):
     return profile_embed
 
 
-def get_guild_profile_embed(guild: Guild, brief: bool = True):
+async def get_guild_profile_embed(guild: Guild, brief: bool = True):
     literal = literals('get_guild_profile_embed')
-    online_members = list()
-    for member in guild.members:
-        if member.status == Status.online:
-            online_members.append(member)
+    online_members = (await guild.widget()).members
     description = literal['description'] % (guild.region, guild.member_count)
     if guild.premium_tier:
         description += '\n' + literal['tier'] % guild.premium_tier
     guild_embed = ChainedEmbed(title=guild.name, description=description)
-    guild_embed.set_author(name=literal['author'] % str(guild.owner), icon_url=guild.owner.avatar_url)
+    guild_embed.set_author(name=literal['author'] % guild.owner.name, icon_url=guild.owner.avatar_url)
     guild_embed.set_thumbnail(url=guild.icon_url)
     if not brief:
         if guild.premium_subscription_count:
@@ -54,7 +52,7 @@ def get_guild_profile_embed(guild: Guild, brief: bool = True):
                                   value='\n'.join(str(subscriber) for subscriber in guild.premium_subscribers))
         if online_members:
             guild_embed.add_field(name=literal['online'] % len(online_members),
-                                  value='\n'.join([str(member) for member in online_members]))
+                                  value='\n'.join([member.name for member in online_members]))
         guild_embed.set_footer(text=f'{guild.created_at} · {guild.id}')
         guild_embed.set_image(url=guild.splash_url)
         if guild.channels:
@@ -170,11 +168,11 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
     @modules.command(name='서버', aliases=('길드',))
     @guild_only()
     async def guild_profile(self, ctx: Context):
-        message = await ctx.send(embed=get_guild_profile_embed(ctx.guild))
+        message = await ctx.send(embed=await get_guild_profile_embed(ctx.guild))
         await attach_toggle_interface(
             self.client, message,
-            EmojiInterfaceState(FOLD_EMOJI, message.edit, embed=get_guild_profile_embed(ctx.guild)),
-            EmojiInterfaceState(DETAIL_EMOJI, message.edit, embed=get_guild_profile_embed(ctx.guild, False)))
+            EmojiInterfaceState(FOLD_EMOJI, message.edit, embed=await get_guild_profile_embed(ctx.guild)),
+            EmojiInterfaceState(DETAIL_EMOJI, message.edit, embed=await get_guild_profile_embed(ctx.guild, False)))
 
     # TODO add command about color pickers
 
