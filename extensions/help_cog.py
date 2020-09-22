@@ -21,8 +21,6 @@ def brief_cog(cog: Cog):
         return brief
     commands = ''
     for command in cog.get_commands():
-        if not command.enabled:
-            continue
         commands += brief_command(command) + '\n'
     if commands:
         brief += '\n' + commands
@@ -34,8 +32,6 @@ def brief_group(group: CustomGroup):
     if group.brief is not None:
         brief += ': ' + group.brief
     for command in group.commands:
-        if not command.enabled:
-            continue
         if isinstance(command, CustomGroup):
             brief += '\n' + brief_group(command)
         else:
@@ -172,6 +168,7 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
         await attach_page_interface(self.client, message, states, ctx.author)
 
     async def send_command_help(self, ctx: Context, command: Command):
+        literal = literals('send_command_help')
         command_name = command.qualified_name
         default_signature = get_command_default_signature(command)
         footer = get_command_signature(command)
@@ -183,8 +180,10 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
         description += f'`{default_signature}`'
         embeds = ChainedEmbed(title=get_constant('default_prefix') + command_name, description=description)
         embeds.set_thumbnail(url=self.client.user.avatar_url)
+        if not command.enabled:
+            embeds.add_field(name=literal['disabled_name'], value=literal['disabled_value'])
         if isinstance(command, CustomGroup):
-            embeds.add_field(name=literals('send_command_help')['subcommand'],
+            embeds.add_field(name=literal['subcommand'],
                              value=f'\n{brief_group(command)}\n')
         for check in command.checks:
             data = get_check(check.name)

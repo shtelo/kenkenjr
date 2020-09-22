@@ -9,12 +9,7 @@ from googleapiclient.discovery import build
 
 from utils import get_path
 
-SCOPES = [
-    "https://spreadsheets.google.com/feeds",
-    'https://www.googleapis.com/auth/spreadsheets',
-    "https://www.googleapis.com/auth/drive.file",
-    "https://www.googleapis.com/auth/drive"
-]
+SCOPES = ['https://www.googleapis.com/auth/drive']
 
 
 def get_service():
@@ -43,9 +38,9 @@ def sheet_read(spreadsheet_id, range_name):
     return values
 
 
-def sheet_write(spreadsheet_id, range_name, body, value_iput_option='USER_ENTERED'):
+def sheet_write(spreadsheet_id, range_name, values, value_iput_option='USER_ENTERED'):
     result = get_service().spreadsheets().values().update(spreadsheetId=spreadsheet_id,
                                                           range=range_name,
                                                           valueInputOption=value_iput_option,
-                                                          body=body).execute()
+                                                          body={'values': values}).execute()
     return result

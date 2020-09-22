@@ -33,13 +33,13 @@ class Log:
             else:
                 print('--not logged : DM')
                 return
-        if not isdir(get_path('logs')):
-            mkdir(get_path('logs'))
-        mode = 'at' if isfile(path) else 'wt'
-        with open(path, mode=mode, encoding='utf-8-sig') as f:
-            f.write(context + '\n')
-        if mode == 'wt':
-            cls.command('logs file separated.')
+        # if not isdir(get_path('logs')):
+        #     mkdir(get_path('logs'))
+        # mode = 'at' if isfile(path) else 'wt'
+        # with open(path, mode=mode, encoding='utf-8-sig') as f:
+        #     f.write(context + '\n')
+        # if mode == 'wt':
+        #     cls.command('logs file separated.')
 
     @classmethod
     def auto(cls, log: str, **kwargs):
