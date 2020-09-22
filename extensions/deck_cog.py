@@ -107,7 +107,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
                     await self.deck_handler.fetch_deck(deck.default_channel)
                     raise e
             await self.deck_handler.save_deck(deck)
-            await message.edit(content=literal['done'] % (' '.join([member.mention for member in pending]), deck.name))
+            await message.edit(content=literal['done'] % (' '.join([str(member) for member in pending]), deck.name))
 
     async def edit_deck_topic(self, ctx: Context, deck: Deck, new_topic: str):
         literal = literals('edit_deck_topic')
@@ -269,7 +269,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             raise BadArgument('no pending found')
         for member in pending:
             deck.pending.remove(member)
-        await ctx.send(literal['done'] % (' '.join([member.mention for member in pending]), deck.name))
+        await ctx.send(literal['done'] % (' '.join([str(member) for member in pending]), deck.name))
         await self.deck_handler.save_deck(deck)
 
     @deck_.command(name='탈퇴', aliases=('나가기',))
