@@ -54,7 +54,7 @@ async def get_guild_profile_embed(guild: Guild, brief: bool = True):
             guild_embed.add_field(name=literal['online'] % len(online_members),
                                   value='\n'.join([member.name for member in online_members]))
         guild_embed.set_footer(text=f'{guild.created_at} · {guild.id}')
-        guild_embed.set_image(url=guild.splash_url)
+        guild_embed.set_image(url=guild.banner_url)
         if guild.channels:
             value = literal['category'] % len(guild.categories)
             value += '\n' + literal['text_channel'] % len(guild.text_channels)
