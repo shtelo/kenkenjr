@@ -11,20 +11,28 @@ from modules import CustomCog, sheet_read, ChainedEmbed, doc_read, shared_cooldo
 from utils import get_cog, literals, wrap_codeblock, get_constant, FreshData, get_emoji, InterfaceState, \
     attach_page_interface
 
-TIMESTAMP = 0
-EMAIL = 1
-DISCORD_ID = 2
-SUBACCOUNT = 3
-NICKNAME = 4
-INVITER = 5
-KNOWLEDGE = 6
-TWITTER_ID = 7
-STATE = 13
-REMARKS = 14
-HOUR = 3600
-STATE_RECEIVED = '접수됨'
-STATE_APPROVED = '승인됨'
-STATE_REJECTED = '기각됨'
+APPLICATION_TIMESTAMP = 0
+APPLICATION_EMAIL = 1
+APPLICATION_DISCORD_ID = 2
+APPLICATION_SUBACCOUNT = 3
+APPLICATION_NICKNAME = 4
+APPLICATION_INVITER = 5
+APPLICATION_KNOWLEDGE = 6
+APPLICATION_TWITTER_ID = 7
+APPLICATION_STATE = 13
+APPLICATION_REMARKS = 14
+
+MEMBER_LIST_NUMBER = 0
+MEMBER_LIST_NICKNAME = 1
+MEMBER_LIST_STATE = 2
+MEMBER_LIST_JOINED_AT = 3
+
+APPLICATION_RECEIVED = '접수됨'
+APPLICATION_APPROVED = '승인됨'
+APPLICATION_REJECTED = '기각됨'
+
+SECOND_PER_HOUR = 3600
+
 NSFW_TIMEOUT = 60
 NSFW_EMOJI = get_emoji(':underage:')
 
@@ -45,7 +53,7 @@ def get_nickname(member: Member):
     _, rows = get_application_sheet()
     for row in rows:
         if str(member) in row:
-            return row[NICKNAME]
+            return row[APPLICATION_NICKNAME]
 
 
 async def update_application(member: Member, state: str, remarks: str, on_error=None):
@@ -53,10 +61,10 @@ async def update_application(member: Member, state: str, remarks: str, on_error=
     keys, rows = get_application_sheet()
     result = False
     for row in rows:
-        if str(member) in row and row[STATE] != state:
-            row[STATE] = state
-            if remarks is not None and not row[REMARKS]:
-                row[REMARKS] = str(remarks).replace('->', '→')
+        if str(member) in row and row[APPLICATION_STATE] != state:
+            row[APPLICATION_STATE] = state
+            if remarks is not None and not row[APPLICATION_REMARKS]:
+                row[APPLICATION_REMARKS] = str(remarks).replace('->', '→')
             print(row)
             result = row.copy()
             break
@@ -73,7 +81,7 @@ def add_member(member: Member):
     sheet = get_constant('member_list')
     rows = sheet_read(sheet['sheet_id'], sheet['range'])
     nickname = get_nickname(member)
-    result = [int(rows[-1][0]) + 1, nickname, str(member.joined_at), str(member.roles[-1])]
+    result = [int(rows[-1][0]) + 1, nickname, str(member.roles[-1]), str(member.joined_at)]
     rows.append(result.copy())
     if result:
         sheet_write(sheet['sheet_id'], sheet['range'], rows)
@@ -87,9 +95,9 @@ def edit_member(query: str, nickname: Optional[str] = None, state: Optional[str]
     for row in rows:
         if query in row:
             if nickname is not None:
-                row[1] = nickname
+                row[MEMBER_LIST_NICKNAME] = nickname
             if state is not None:
-                row[3] = state
+                row[MEMBER_LIST_STATE] = state
             result = row.copy()
             break
     if result:
@@ -97,48 +105,37 @@ def edit_member(query: str, nickname: Optional[str] = None, state: Optional[str]
     return result
 
 
-def get_state_emoji(application: list):
+def get_application_state_emoji(application: list):
     literal = literals('get_state_emoji')
-    if application[STATE] == STATE_RECEIVED:
+    if application[APPLICATION_STATE] == APPLICATION_RECEIVED:
         return literal['received']
-    elif application[STATE] == STATE_APPROVED:
+    elif application[APPLICATION_STATE] == APPLICATION_APPROVED:
         return literal['approved']
-    elif application[STATE] == STATE_REJECTED:
+    elif application[APPLICATION_STATE] == APPLICATION_REJECTED:
         return literal['rejected']
     return literal['not_handled']
 
 
 def get_application_embed(data: list):
     literal = literals('get_application_embed')
-    discord_id = data[DISCORD_ID]
-    title = literal['title'] % discord_id + get_state_emoji(data)
+    discord_id = data[APPLICATION_DISCORD_ID]
+    title = literal['title'] % discord_id + get_application_state_emoji(data)
     embeds = ChainedEmbed(title=title,
-                          description=literal['description'] % (data[TIMESTAMP], data[EMAIL]))
-    if data[SUBACCOUNT] != literal['false']:
-        embeds.add_field(name=literal['subaccount'], value=literal['mainaccount'] % data[SUBACCOUNT])
-    if data[NICKNAME]:
-        embeds.add_field(name=literal['nickname'], value='**' + data[NICKNAME] + '**')
-    if data[DISCORD_ID]:
-        embeds.add_field(name=literal['discord_id'], value='`' + data[DISCORD_ID] + '`', inline=True)
-    if data[TWITTER_ID]:
-        embeds.add_field(name=literal['twitter_id'], value='`' + data[TWITTER_ID] + '`', inline=True)
-    if data[INVITER]:
-        embeds.add_field(name=literal['inviter'], value='`' + data[INVITER] + '`', inline=True)
-    if data[KNOWLEDGE]:
-        embeds.add_field(name=literal['knowledge'], value='```\n' + data[KNOWLEDGE] + '\n```')
-    if data[REMARKS]:
-        embeds.add_field(name=literal['remarks'], value='```\n' + data[REMARKS] + '\n```')
-    return embeds
-
-
-def get_application_raw_embed(keys: list, data: list):
-    literal = literals('get_application_raw_embed')
-    discord_id = data[DISCORD_ID]
-    title = literal['title'] % discord_id + get_state_emoji(data)
-    embeds = ChainedEmbed(title=title, description=literal['description'])
-    for i in range(len(keys)):
-        if data[i]:
-            embeds.add_field(name=keys[i], value='```\n' + data[i] + '\n```')
+                          description=literal['description'] % (data[APPLICATION_TIMESTAMP], data[APPLICATION_EMAIL]))
+    if data[APPLICATION_SUBACCOUNT] != literal['false']:
+        embeds.add_field(name=literal['subaccount'], value=literal['mainaccount'] % data[APPLICATION_SUBACCOUNT])
+    if data[APPLICATION_NICKNAME]:
+        embeds.add_field(name=literal['nickname'], value='**' + data[APPLICATION_NICKNAME] + '**')
+    if data[APPLICATION_DISCORD_ID]:
+        embeds.add_field(name=literal['discord_id'], value='`' + data[APPLICATION_DISCORD_ID] + '`', inline=True)
+    if data[APPLICATION_TWITTER_ID]:
+        embeds.add_field(name=literal['twitter_id'], value='`' + data[APPLICATION_TWITTER_ID] + '`', inline=True)
+    if data[APPLICATION_INVITER]:
+        embeds.add_field(name=literal['inviter'], value='`' + data[APPLICATION_INVITER] + '`', inline=True)
+    if data[APPLICATION_KNOWLEDGE]:
+        embeds.add_field(name=literal['knowledge'], value='```\n' + data[APPLICATION_KNOWLEDGE] + '\n```')
+    if data[APPLICATION_REMARKS]:
+        embeds.add_field(name=literal['remarks'], value='```\n' + data[APPLICATION_REMARKS] + '\n```')
     return embeds
 
 
@@ -155,7 +152,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
 
     def fetch_regulation(self):
         if self.regulation is None \
-                or (datetime.now() - self.regulation.timestamp).total_seconds() > HOUR:
+                or (datetime.now() - self.regulation.timestamp).total_seconds() > SECOND_PER_HOUR:
             paragraphs = wrap_codeblock(doc_read(get_constant('regulation')['doc_id']), split_paragraph=True)
             self.regulation = FreshData(paragraphs)
         else:
@@ -168,10 +165,10 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         start_message = await ctx.send(literal['start'])
         message = None
         _, replies = get_application_sheet()
-        query = tuple({q for q in query if q in (STATE_RECEIVED, STATE_APPROVED, STATE_REJECTED)})
+        query = tuple({q for q in query if q in (APPLICATION_RECEIVED, APPLICATION_APPROVED, APPLICATION_REJECTED)})
         if not query:
-            query = (STATE_RECEIVED,)
-        queried = [reply for reply in replies if not reply[STATE] or reply[STATE] in query]
+            query = (APPLICATION_RECEIVED,)
+        queried = [reply for reply in replies if not reply[APPLICATION_STATE] or reply[APPLICATION_STATE] in query]
         count = len(queried)
         states = list()
         for i, reply in enumerate(reversed(queried)):
@@ -195,7 +192,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         message = await ctx.send(literal['start'])
         if remarks is None:
             remarks = member.id
-        await update_application(member, STATE_RECEIVED, remarks, message.delete())
+        await update_application(member, APPLICATION_RECEIVED, remarks, message.delete())
         tester_role = ctx.guild.get_role(get_constant('tester_role'))
         if tester_role not in member.roles:
             await member.add_roles(tester_role)
@@ -209,7 +206,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         message = await ctx.send(literal['start'])
         if remarks is None:
             remarks = member.id
-        await update_application(member, STATE_APPROVED, remarks, message.delete())
+        await update_application(member, APPLICATION_APPROVED, remarks, message.delete())
         tester_role = ctx.guild.get_role(get_constant('tester_role'))
         member_role = ctx.guild.get_role(get_constant('member_role'))
         if tester_role in member.roles:
@@ -249,9 +246,6 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         edit_member(query, None, state)
         await message.edit(content=literal['done'])
 
-
-    
-
     # @applications.command(name='기각')
     # @guild_only()
     # @partner_only()
@@ -269,7 +263,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
 
     @applications.command(name='전체', aliases=('*',))
     async def applications_all(self, ctx: Context):
-        await self.applications(ctx, STATE_RECEIVED, STATE_APPROVED, STATE_REJECTED)
+        await self.applications(ctx, APPLICATION_RECEIVED, APPLICATION_APPROVED, APPLICATION_REJECTED)
 
     @modules.group(name='회칙')
     async def regulation(self, ctx: Context, *, keyword: str = ''):
