@@ -229,10 +229,14 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         await message.edit(content=literal['done'])
 
     @member.group(name='수정', enabled=False)
+    @guild_only()
+    @partner_only()
     async def member_edit(self, ctx: Context):
         pass
 
     @member_edit.command(name='닉네임')
+    @guild_only()
+    @partner_only()
     async def member_edit_nickname(self, ctx: Context, query: str, *, nickname: str):
         literal = literals('member')
         message = await ctx.send(literal['start'])
@@ -240,6 +244,8 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         await message.edit(content=literal['done'])
 
     @member_edit.command(name='상태')
+    @guild_only()
+    @partner_only()
     async def member_edit_state(self, ctx: Context, query: str, *, state: str):
         literal = literals('member')
         message = await ctx.send(literal['start'])
