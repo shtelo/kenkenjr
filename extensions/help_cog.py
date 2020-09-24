@@ -111,7 +111,7 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
         embeds.set_thumbnail(url=self.client.user.avatar_url)
         found = 0
         for command in self.client.commands:
-            check_correlation(command, keywords, embeds)
+            found += check_correlation(command, keywords, embeds)
         embeds.description = description % (found, ', '.join(keywords)) if found \
             else literal['not_found'] % ', '.join(keywords)
         for embed in embeds.to_list():
