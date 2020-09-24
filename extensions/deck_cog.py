@@ -235,7 +235,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         else:
             deck.pending.append(author)
             tasks = [ctx.send(literal['applied'] % deck.name),
-                     deck.manager.send(literal['pending'] % (author.mention, deck.name, deck.id, str(author))),
+                     deck.manager.send(literal['pending'] % (str(author), deck.name, deck.id, str(author))),
                      self.deck_handler.save_deck(deck)]
             await asyncio.wait(tasks)
 
