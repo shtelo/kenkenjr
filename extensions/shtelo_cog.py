@@ -194,9 +194,17 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
             remarks = member.id
         await update_application(member, APPLICATION_RECEIVED, remarks, message.delete())
         tester_role = ctx.guild.get_role(get_constant('tester_role'))
+        title_div_role = ctx.guild.get_role(get_constant('title_div_role'))
+        deck_div_role = ctx.guild.get_role(get_constant('deck_div_role'))
+        tasks = list()
         if tester_role not in member.roles:
-            await member.add_roles(tester_role)
-        await message.edit(content=literal['done'] % member.mention)
+            tasks.append(member.add_roles(tester_role))
+        if title_div_role not in member.roles:
+            tasks.append(member.add_roles(title_div_role))
+        if deck_div_role not in member.roles:
+            tasks.append(member.add_roles(deck_div_role))
+        tasks.append(message.edit(content=literal['done'] % member.mention))
+        await asyncio.wait(tasks)
 
     @applications.command(name='승인')
     @guild_only()
@@ -209,11 +217,13 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         await update_application(member, APPLICATION_APPROVED, remarks, message.delete())
         tester_role = ctx.guild.get_role(get_constant('tester_role'))
         member_role = ctx.guild.get_role(get_constant('member_role'))
+        tasks = list()
         if tester_role in member.roles:
-            await member.remove_roles(tester_role)
+            tasks.append(member.remove_roles(tester_role))
         if member_role not in member.roles:
-            await member.add_roles(member_role)
-        await message.edit(content=literal['done'] % member.mention)
+            tasks.append(member.add_roles(member_role))
+        tasks.append(message.edit(content=literal['done'] % member.mention))
+        await asyncio.wait(tasks)
 
     @modules.group(name='회원', enabled=False)
     async def member(self, ctx: Context):

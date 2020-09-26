@@ -45,7 +45,7 @@ async def attach_toggle_interface(bot: Bot, message: Message, primary_state: Emo
                 'reaction_add', timeout=timeout,
                 check=check_reaction(bot, message, user, (primary_state.emoji, secondary_state.emoji)))
         except asyncio.TimeoutError:
-            await try_to_clear_reactions(message)
+            await try_to_clear_reactions(message)   # todo remove specific emojis instead of clear every emojis
             break
         else:
             if reaction.emoji == primary_state.emoji:
