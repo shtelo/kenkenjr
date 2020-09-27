@@ -262,7 +262,8 @@
     ":page_with_curl:": "\uD83D\uDCC3",
     ":loud_sound:": "\uD83D\uDD0A",
     ":star:": "⭐",
-    ":open_file_folder:": "\uD83D\uDCC2"
+    ":open_file_folder:": "\uD83D\uDCC2",
+    ":coin:": "\uD83E\uDE99"
   },
   "send_command_help": {
     "disabled_name": "❌ 사용할 수 없는 명령어",
@@ -351,10 +352,10 @@
     "draw": "이번 라운드는 무승부야!"
   },
   "get_chip_str": {
-    "emoji": "\uD83D\uDCC0 "
+    "emoji": "\uD83E\uDE99 "
   },
   "get_chip_embed": {
-    "chip_title": "\uD83D\uDCC0 현재 칩",
+    "chip_title": "\uD83E\uDE99 현재 칩",
     "chip_description": "가지고 있는 칩의 정보야!",
     "chip_name": "**%s**의 칩",
     "betting_name": "**%s**의 배팅"
