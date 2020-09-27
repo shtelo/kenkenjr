@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime
 from typing import Optional
 
-from discord import Member
+from discord import Member, Message
 from discord.ext.commands import Bot, Context, BucketType, BadArgument
 
 import modules
@@ -49,23 +49,33 @@ def get_application_sheet():
     return keys, rows
 
 
-def get_nickname(member: Member):
-    _, rows = get_application_sheet()
+def get_application_of(member: Member, rows=None):
+    if rows is None:
+        _, rows = get_application_sheet()
+    for row in rows:
+        if str(member) in row:
+            return row
+    return None
+
+
+def get_nickname(member: Member, rows=None):
+    if rows is None:
+        _, rows = get_application_sheet()
     for row in rows:
         if str(member) in row:
             return row[APPLICATION_NICKNAME]
 
 
-async def update_application(member: Member, state: str, remarks: str, on_error=None):
+async def update_application(member: Member, state: str, remarks: str, on_error=None, keys=None, rows=None):
     sheet = get_constant('application')
-    keys, rows = get_application_sheet()
+    if keys is None or rows is None:
+        keys, rows = get_application_sheet()
     result = False
     for row in rows:
         if str(member) in row and row[APPLICATION_STATE] != state:
             row[APPLICATION_STATE] = state
             if remarks is not None and not row[APPLICATION_REMARKS]:
                 row[APPLICATION_REMARKS] = str(remarks).replace('->', '→')
-            print(row)
             result = row.copy()
             break
     if not result:
@@ -77,10 +87,12 @@ async def update_application(member: Member, state: str, remarks: str, on_error=
     return result
 
 
-def add_member(member: Member):
+def add_member(member: Member, nickname=None, rows=None):
     sheet = get_constant('member_list')
-    rows = sheet_read(sheet['sheet_id'], sheet['range'])
-    nickname = get_nickname(member)
+    if rows is None:
+        rows = sheet_read(sheet['sheet_id'], sheet['range'])
+    if nickname is None:
+        nickname = get_nickname(member)
     result = [int(rows[-1][0]) + 1, nickname, str(member.roles[-1]), str(member.joined_at)]
     rows.append(result.copy())
     if result:
@@ -88,9 +100,10 @@ def add_member(member: Member):
     return result
 
 
-def edit_member(query: str, nickname: Optional[str] = None, state: Optional[str] = None):
+def edit_member(query: str, nickname: Optional[str] = None, state: Optional[str] = None, rows=None):
     sheet = get_constant('member_list')
-    rows = sheet_read(sheet['sheet_id'], sheet['range'])
+    if rows is None:
+        rows = sheet_read(sheet['sheet_id'], sheet['range'])
     result = None
     for row in rows:
         if query in row:
@@ -139,6 +152,22 @@ def get_application_embed(data: list):
     return embeds
 
 
+async def receive_application(ctx, member: Member, remarks: str, on_error=None, keys=None, rows=None):
+    await update_application(member, APPLICATION_RECEIVED, remarks, on_error, keys, rows)
+    tester_role = ctx.guild.get_role(get_constant('tester_role'))
+    title_div_role = ctx.guild.get_role(get_constant('title_div_role'))
+    deck_div_role = ctx.guild.get_role(get_constant('deck_div_role'))
+    tasks = list()
+    if tester_role not in member.roles:
+        tasks.append(member.add_roles(tester_role))
+    if title_div_role not in member.roles:
+        tasks.append(member.add_roles(title_div_role))
+    if deck_div_role not in member.roles:
+        tasks.append(member.add_roles(deck_div_role))
+    if tasks:
+        await asyncio.wait(tasks)
+
+
 class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
     """
     슈텔로의 관리를 위한 기능을 포함합니다.
@@ -152,12 +181,24 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
 
     def fetch_regulation(self):
         if self.regulation is None \
-                or (datetime.now() - self.regulation.timestamp).total_seconds() > SECOND_PER_HOUR:
+                or self.regulation.data is None:
             paragraphs = wrap_codeblock(doc_read(get_constant('regulation')['doc_id']), split_paragraph=True)
-            self.regulation = FreshData(paragraphs)
+            self.regulation = FreshData(paragraphs, SECOND_PER_HOUR)
         else:
             paragraphs = self.regulation.data
         return paragraphs
+
+    @modules.CustomCog.listener(name='on_message')
+    async def receive_automatically(self, message: Message):
+        if message.channel.id != get_constant('self_introduction_channel') or len(message.content) < 10:
+            return
+        keys, rows = get_application_sheet()
+        application = get_application_of(message.author, rows)
+        if application is None or application[APPLICATION_STATE]:
+            return
+        await receive_application(message, message.author, str(message.author.id), None, keys, rows)
+        add_member(message.author, application[APPLICATION_NICKNAME])
+        await message.add_reaction(get_emoji(':white_check_mark:'))
 
     @modules.group(name='가입신청서', aliases=('가입', '신청서'))
     async def applications(self, ctx: Context, *query: str):
@@ -192,19 +233,8 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         message = await ctx.send(literal['start'])
         if remarks is None:
             remarks = member.id
-        await update_application(member, APPLICATION_RECEIVED, remarks, message.delete())
-        tester_role = ctx.guild.get_role(get_constant('tester_role'))
-        title_div_role = ctx.guild.get_role(get_constant('title_div_role'))
-        deck_div_role = ctx.guild.get_role(get_constant('deck_div_role'))
-        tasks = list()
-        if tester_role not in member.roles:
-            tasks.append(member.add_roles(tester_role))
-        if title_div_role not in member.roles:
-            tasks.append(member.add_roles(title_div_role))
-        if deck_div_role not in member.roles:
-            tasks.append(member.add_roles(deck_div_role))
-        tasks.append(message.edit(content=literal['done'] % member.mention))
-        await asyncio.wait(tasks)
+        await receive_application(ctx, member, remarks, message.delete())
+        await ctx.edit(content=literal['done'] % member.mention)
 
     @applications.command(name='승인')
     @guild_only()
