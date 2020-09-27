@@ -218,7 +218,7 @@ class DeckHandler:
     async def remove_channel(self, channel: Union[TextChannel, VoiceChannel], deck: Deck = None):
         if deck is None:
             deck = self.get_deck_by_channel(channel)
-        await channel.edit(name=deck.name + '__' + channel.name, category=self.recycle_bin)
+        await channel.edit(name=deck.name + '__' + channel.name, category=self.recycle_bin, sync_permissions=True)
 
     def get_deck_by_channel(self, channel: GuildChannel):
         if isinstance(channel, TextChannel) or isinstance(channel, VoiceChannel):
