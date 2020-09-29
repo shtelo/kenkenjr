@@ -2,9 +2,9 @@ from discord import NotFound, ClientException, Forbidden, HTTPException
 from discord.ext.commands import Context
 
 import modules
-from modules import CustomCog, owner_only, guild_only, partner_only, sheet_write
+from modules import CustomCog, owner_only, guild_only, partner_only
 from modules.custom.custom_bot import CustomBot
-from utils import get_cog, literals, reload_literals, Log, get_constant
+from utils import get_cog, literals, reload_literals, Log
 
 
 class ControlCog(CustomCog, name=get_cog('ControlCog')['name']):

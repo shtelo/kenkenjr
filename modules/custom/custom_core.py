@@ -43,7 +43,8 @@ class CustomGroup(CustomGroupMixin, CustomCommand, Group):
 def command(name=None, cls=None, **attrs):
     if cls is None:
         cls = CustomCommand
-
+    attrs.setdefault('cooldown_after_parsing', True)
+    
     def decorator(func):
         if isinstance(func, Command):
             raise TypeError('Callback is already a command.')
@@ -55,6 +56,7 @@ def command(name=None, cls=None, **attrs):
 def group(name=None, **attrs):
     attrs.setdefault('cls', CustomGroup)
     attrs.setdefault('invoke_without_command', True)
+    attrs.setdefault('cooldown_after_parsing', True)
     return command(name=name, **attrs)
 
 
