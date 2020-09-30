@@ -101,6 +101,8 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         count = 0
         for ken in ('켄', '캔', '켼', '컌', '꺤', '꼔', '껜', '깬'):
             count += message.count(ken)
+        if count < 2:
+            count = 0
         if not count and any(word in message.upper()
                              for word in ('KENKEN', '켄켄', str(self.client.user.id), self.client.user.display_name)):
             count = 2
