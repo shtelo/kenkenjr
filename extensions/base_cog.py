@@ -83,7 +83,6 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         with open(get_path('greetings'), 'r', encoding='utf-8') as f:
             self.greetings = f.read().split('\n')
         self.protocol_cog = self.client.get_cog(get_cog('ProtocolCog')['name'])
-        self.characters.extend(('!', '?'))
         for initial in ('ㅁ', 'ㅇ', 'ㄹ', 'ㄴ'):
             for final in ('ㅁ', 'ㅇ', 'ㄴ', None):
                 for medial in map(str, CHAR_MEDIALS):
@@ -121,7 +120,8 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
                 Log.command('kenkenjr called.')
                 await message.channel.send(f'{choice(self.reactions)}')
             else:
-                await message.channel.send(''.join([choice(self.characters) for _ in range(count)])[:1997] + '!!?')
+                await message.channel.send(''.join([choice(self.characters) for _ in range(count)])[:1997]
+                                           + ''.join([choice(tuple('!?.')) for _ in range(3)]))
 
     @CustomCog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
