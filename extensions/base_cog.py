@@ -9,7 +9,8 @@ from discord.ext.commands import Context, Bot, MemberConverter, BadArgument
 
 import modules
 from modules import CustomCog, tokens_len, ChainedEmbed, guild_only
-from utils import get_cog, get_path, Log, literals, get_emoji, attach_toggle_interface, EmojiInterfaceState
+from utils import get_cog, get_path, Log, literals, get_emoji, attach_toggle_interface, EmojiInterfaceState, \
+    CHAR_MEDIALS, join_jamos_char
 
 NICK_MAX_LENGTH = 32
 
@@ -73,6 +74,7 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         self.client: Bot = client
         self.reactions: list = list()
         self.greetings: list = list()
+        self.characters: list = list()
         self.protocol_cog = None
 
     async def after_ready(self):
@@ -80,6 +82,12 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
             self.reactions = f.read().split('\n')
         with open(get_path('greetings'), 'r', encoding='utf-8') as f:
             self.greetings = f.read().split('\n')
+        self.protocol_cog = self.client.get_cog(get_cog('ProtocolCog')['name'])
+        self.characters.extend(('!', '?'))
+        for initial in ('ㅁ', 'ㅇ', 'ㄹ', 'ㄴ'):
+            for final in ('ㅁ', 'ㅇ', 'ㄴ', None):
+                for medial in map(str, CHAR_MEDIALS):
+                    self.characters.append(join_jamos_char(initial, medial, final))
 
     def get_greeting(self, message):
         greeting = f'{choice(self.greetings)}'
@@ -89,23 +97,29 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
             greeting += '!'
         return greeting
 
+    def kenken_called(self, message: str):
+        count = 0
+        for ken in ('켄', '캔', '켼', '컌', '꺤', '꼔', '껜', '깬'):
+            count += message.count(ken)
+        if not count and any(word in message.upper()
+                             for word in ('KENKEN', '켄켄', str(self.client.user.id), self.client.user.display_name)):
+            count = 2
+        return count
+
     @CustomCog.listener()
     async def on_message(self, message: Message):
-        if self.protocol_cog is None:
-            self.protocol_cog = self.client.get_cog(get_cog('ProtocolCog')['name'])
         ctx: commands.Context = await self.client.get_context(message)
         if ctx.valid or message.author.id == self.client.user.id or self.protocol_cog.get_request(message) is not None:
             return
-        nick = self.client.user.display_name
-        if (any(word in message.content.upper()
-                for word in ['KENKEN', '켄켄', str(self.client.user.id), self.client.user.display_name, nick]) or
-                message.content.count('켄') == 2):
+        if count := self.kenken_called(message.content):
             if any(word in message.content.upper() for word in self.greetings):
                 Log.command('kenkenjr greeted.')
                 await ctx.send(self.get_greeting(message))
-            else:
+            elif count <= 2:
                 Log.command('kenkenjr called.')
                 await message.channel.send(f'{choice(self.reactions)}')
+            else:
+                await message.channel.send(''.join([choice(self.characters) for _ in range(count)])[:1997] + '!!?')
 
     @CustomCog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
