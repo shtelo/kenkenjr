@@ -2,14 +2,16 @@ import asyncio
 from datetime import datetime
 from typing import Optional
 
-from discord import Member, Message
-from discord.ext.commands import Bot, Context, BucketType, BadArgument
+from discord import Member, Message, TextChannel, Role, Reaction, User, Guild
+from discord.ext.commands import Bot, Context, BucketType, BadArgument, MemberConverter
 
 import modules
 from modules import CustomCog, sheet_read, ChainedEmbed, doc_read, shared_cooldown, DeckHandler, sheet_write, \
     partner_only, guild_only
 from utils import get_cog, literals, wrap_codeblock, get_constant, FreshData, get_emoji, InterfaceState, \
     attach_page_interface
+
+NO = '아니오'
 
 APPLICATION_TIMESTAMP = 0
 APPLICATION_EMAIL = 1
@@ -36,6 +38,8 @@ SECOND_PER_HOUR = 3600
 NSFW_TIMEOUT = 60
 NSFW_EMOJI = get_emoji(':underage:')
 
+CONFIRM_EMOJI = get_emoji(':white_check_mark:')
+
 deck_cooldown = shared_cooldown(1, 60, BucketType.category)
 
 
@@ -52,7 +56,7 @@ def get_application_sheet():
 def get_application_of(member: Member, rows=None):
     if rows is None:
         _, rows = get_application_sheet()
-    for row in rows:
+    for row in reversed(rows):
         if str(member) in row:
             return row
     return None
@@ -80,7 +84,7 @@ async def update_application(member: Member, state: str, remarks: str, on_error=
             break
     if not result:
         if on_error is not None:
-            await on_error
+            await on_error()
         raise BadArgument(f'application not found')
     rows.insert(0, keys)
     sheet_write(sheet['sheet_id'], sheet['range'], rows)
@@ -152,22 +156,6 @@ def get_application_embed(data: list):
     return embeds
 
 
-async def receive_application(ctx, member: Member, remarks: str, on_error=None, keys=None, rows=None):
-    await update_application(member, APPLICATION_RECEIVED, remarks, on_error, keys, rows)
-    tester_role = ctx.guild.get_role(get_constant('tester_role'))
-    title_div_role = ctx.guild.get_role(get_constant('title_div_role'))
-    deck_div_role = ctx.guild.get_role(get_constant('deck_div_role'))
-    tasks = list()
-    if tester_role not in member.roles:
-        tasks.append(member.add_roles(tester_role))
-    if title_div_role not in member.roles:
-        tasks.append(member.add_roles(title_div_role))
-    if deck_div_role not in member.roles:
-        tasks.append(member.add_roles(deck_div_role))
-    if tasks:
-        await asyncio.wait(tasks)
-
-
 class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
     """
     슈텔로의 관리를 위한 기능을 포함합니다.
@@ -178,6 +166,22 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         self.client: Bot = client
         self.regulation: Optional[FreshData] = None
         self.deck_handler: DeckHandler = DeckHandler(client)
+        self.shtelo_guild: Optional[Guild] = None
+        self.partner_channel: Optional[TextChannel] = None
+        self.member_role: Optional[Role] = None
+        self.tester_role: Optional[Role] = None
+        self.title_div_role: Optional[Role] = None
+        self.deck_div_role: Optional[Role] = None
+        self.partner_role: Optional[Role] = None
+
+    async def after_ready(self):
+        self.shtelo_guild = self.client.get_guild(get_constant('shtelo_guild'))
+        self.partner_channel = self.client.get_channel(get_constant('partner_channel'))
+        self.member_role = self.shtelo_guild.get_role(get_constant('member_role'))
+        self.tester_role = self.shtelo_guild.get_role(get_constant('tester_role'))
+        self.title_div_role = self.shtelo_guild.get_role(get_constant('title_div_role'))
+        self.deck_div_role = self.shtelo_guild.get_role(get_constant('deck_div_role'))
+        self.partner_role = self.shtelo_guild.get_role(get_constant('partner_role'))
 
     def fetch_regulation(self):
         if self.regulation is None \
@@ -188,17 +192,54 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
             paragraphs = self.regulation.data
         return paragraphs
 
+    async def receive_application(self, member: Member, remarks: str, on_error=None, keys=None, rows=None):
+        await update_application(member, APPLICATION_RECEIVED, remarks, on_error, keys, rows)
+        tasks = list()
+        if self.tester_role not in member.roles:
+            tasks.append(member.add_roles(self.tester_role))
+        if self.title_div_role not in member.roles:
+            tasks.append(member.add_roles(self.title_div_role))
+        if self.deck_div_role not in member.roles:
+            tasks.append(member.add_roles(self.deck_div_role))
+        if tasks:
+            await asyncio.wait(tasks)
+
     @modules.CustomCog.listener(name='on_message')
     async def receive_automatically(self, message: Message):
+        literal = literals('receive_automatically')
+
+        async def failed():
+            await self.partner_channel.send(literal['failed'] % message.author.mention)
+
         if message.channel.id != get_constant('self_introduction_channel') or len(message.content) < 10:
             return
         keys, rows = get_application_sheet()
         application = get_application_of(message.author, rows)
         if application is None or application[APPLICATION_STATE]:
             return
-        await receive_application(message, message.author, str(message.author.id), None, keys, rows)
-        add_member(message.author, application[APPLICATION_NICKNAME])
-        await message.add_reaction(get_emoji(':white_check_mark:'))
+        trigger_member_name = application[APPLICATION_INVITER]
+        trigger_role = self.member_role
+        if not trigger_member_name:
+            trigger_member_name = application[APPLICATION_SUBACCOUNT]
+            trigger_role = None
+        try:
+            trigger_member = await MemberConverter().convert(await self.client.get_context(message),
+                                                             trigger_member_name)
+        except BadArgument as e:
+            await failed()
+            raise e
+        if trigger_role is not None and trigger_role not in trigger_member.roles:
+            await failed()
+            return
+        remark = str(message.author.id)
+        if not application[APPLICATION_INVITER]:
+            remark = literal['subaccount'] % (trigger_member.id, remark)
+        await self.receive_application(message.author, remark, None, keys, rows)
+        await message.add_reaction(CONFIRM_EMOJI)
+        if application[APPLICATION_INVITER]:
+            add_member(message.author, application[APPLICATION_NICKNAME])
+        await self.partner_channel.send(literal['done'] % (message.author.mention, message.jump_url),
+                                        embed=get_application_embed(application))
 
     @modules.group(name='가입신청서', aliases=('가입', '신청서'))
     async def applications(self, ctx: Context, *query: str):
@@ -233,8 +274,8 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         message = await ctx.send(literal['start'])
         if remarks is None:
             remarks = member.id
-        await receive_application(ctx, member, remarks, message.delete())
-        await ctx.edit(content=literal['done'] % member.mention)
+        await self.receive_application(member, remarks, message.delete)
+        await ctx.message.edit(content=literal['done'] % member.mention)
 
     @applications.command(name='승인')
     @guild_only()
@@ -244,7 +285,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         message = await ctx.send(literal['start'])
         if remarks is None:
             remarks = member.id
-        await update_application(member, APPLICATION_APPROVED, remarks, message.delete())
+        await update_application(member, APPLICATION_APPROVED, remarks, message.delete)
         tester_role = ctx.guild.get_role(get_constant('tester_role'))
         member_role = ctx.guild.get_role(get_constant('member_role'))
         tasks = list()

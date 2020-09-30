@@ -13,6 +13,7 @@
     "deck_div_role": 759392766416519168,
     "shtelo_guild": 650533223520010261,
     "partner_channel": 650591167230246943,
+    "partner_bot_channel": 677753189742936064,
     "self_introduction_channel": 650534591291064320,
     "deleted_category": 757466502202130512,
     "application": {
@@ -588,5 +589,10 @@
   "member": {
     "start": "회원 목록을 수정하고 있어...",
     "done": "회원 목록을 수정했어!"
+  },
+  "receive_automatically": {
+    "done": "%s의 가입신청서가 접수됐어! 자기소개 메시지랑 신청서를 검토해줘!\n> %s",
+    "subaccount": "부계정 %s -> %s",
+    "failed": "%s의 가입신청서를 자동으로 접수할 수 없어!!! 신청서에 문제가 없나 확인해줘!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/"
   }
 }
