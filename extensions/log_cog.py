@@ -20,55 +20,34 @@ class LogCog(CustomCog, name=get_cog('LogCog')['name']):
         self.client: Bot = client
         self.owner: User = None
 
-    # @CustomCog.listener()
-    # async def on_ready(self):
-    #     Log.auto(f'{self.client.user} on ready!')
-
-    # @CustomCog.listener()
-    # async def on_message(self, msg: Message):
-    #     if msg.content:
-    #         Log.auto(f'\n\t{msg.guild}/{msg.channel}/{msg.author}/{msg.id}\n\t{msg.content}',
-    #                  message=msg)
+    async def after_ready(self):
+        self.owner = await self.client.fetch_user(get_constant('zer0ken_id'))
 
     @CustomCog.listener()
-    async def on_message_edit(self, msg_before: Message, msg_after: Message):
-        # if msg_before.content or msg_after.content:
-        #     Log.auto(f'\n\t{msg_before.guild}/{msg_before.channel}/{msg_before.author}/{msg_before.id}\n\t'
-        #              f'before : {msg_before.content}\n\t'
-        #              f'after : {msg_after.content}',
-        #              message=msg_after)
+    async def on_message_edit(self, _, msg_after: Message):
         ctx = await self.client.get_context(msg_after)
         await self.client.invoke(ctx)
 
-    # @CustomCog.listener()
-    # async def on_message_delete(self, msg: Message):
-    #     if msg.content:
-    #         Log.auto(f'\n\t{msg.guild}/{msg.channel}/{msg.author}/{msg.id}\n\t'
-    #                  f'content : {msg.content}',
-    #                  message=msg)
-
     @CustomCog.listener()
     async def on_command_error(self, ctx: Context, error: Exception):
+        handled = False
         if isinstance(error, CommandOnCooldown):
-            # Log.error(f'command now on cooldown, {error.retry_after}s left.')
             await ctx.send(literals('LogCog.on_command_error')['cooldown'] % math.ceil(error.retry_after))
-        # elif ctx.command is not None:
-        #     ctx.command.reset_cooldown(ctx)
-        # elif isinstance(error, CommandNotFound):
-        #     Log.error(f'not command : {error}')
-        # elif isinstance(error, CheckFailure):
-        #     Log.error(f'check failed : {error}')
-        # elif isinstance(error, BadUnionArgument):
-        #     Log.error(f'bad union argument: {error}')
-        # elif isinstance(error, MissingRequiredArgument):
-        #     Log.error(f'missing required argument : {error}')
-        # elif isinstance(error, DisabledCommand):
-        #     Log.error(f'disabled command : {error}')
-        if self.owner is None:
-            self.owner = await self.client.fetch_user(get_constant('zer0ken_id'))
-        await self.owner.send("\n".join(traceback.format_exception(etype=type(error),
-                                                                   value=error,
-                                                                   tb=error.__traceback__)))
+            handled = True
+        elif ctx.command is not None:
+            ctx.command.reset_cooldown(ctx)
+        if any((isinstance(error, CommandNotFound),
+                isinstance(error, CheckFailure),
+                isinstance(error, BadUnionArgument),
+                isinstance(error, MissingRequiredArgument),
+                isinstance(error, DisabledCommand))):
+            handled = True
+        if not handled:
+            error_message = f'{ctx.channel}/{ctx.author}\n```\n'
+            error_message += '\n'.join(traceback.format_exception(etype=type(error), value=error,
+                                                                  tb=error.__traceback__))
+            error_message += '\n```'
+            await self.owner.send(error_message)
         raise error
 
 
