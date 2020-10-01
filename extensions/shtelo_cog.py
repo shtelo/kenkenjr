@@ -23,6 +23,7 @@ APPLICATION_KNOWLEDGE = 6
 APPLICATION_TWITTER_ID = 7
 APPLICATION_STATE = 13
 APPLICATION_REMARKS = 14
+APPLICATION_PERIOD = 15
 
 MEMBER_LIST_NUMBER = 0
 MEMBER_LIST_NICKNAME = 1
@@ -145,10 +146,12 @@ def get_application_embed(data: list):
         embeds.add_field(name=literal['nickname'], value='**' + data[APPLICATION_NICKNAME] + '**')
     if data[APPLICATION_DISCORD_ID]:
         embeds.add_field(name=literal['discord_id'], value='`' + data[APPLICATION_DISCORD_ID] + '`', inline=True)
-    if data[APPLICATION_TWITTER_ID]:
-        embeds.add_field(name=literal['twitter_id'], value='`' + data[APPLICATION_TWITTER_ID] + '`', inline=True)
     if data[APPLICATION_INVITER]:
         embeds.add_field(name=literal['inviter'], value='`' + data[APPLICATION_INVITER] + '`', inline=True)
+    if data[APPLICATION_PERIOD]:
+        embeds.add_field(name=literal['period'], value='**' + data[APPLICATION_PERIOD] + '**', inline=True)
+    if data[APPLICATION_TWITTER_ID]:
+        embeds.add_field(name=literal['twitter_id'], value='`' + data[APPLICATION_TWITTER_ID] + '`', inline=True)
     if data[APPLICATION_KNOWLEDGE]:
         embeds.add_field(name=literal['knowledge'], value='```\n' + data[APPLICATION_KNOWLEDGE] + '\n```')
     if data[APPLICATION_REMARKS]:

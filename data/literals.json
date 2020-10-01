@@ -264,7 +264,8 @@
     ":loud_sound:": "\uD83D\uDD0A",
     ":star:": "⭐",
     ":open_file_folder:": "\uD83D\uDCC2",
-    ":coin:": "\uD83E\uDE99"
+    ":coin:": "\uD83E\uDE99",
+    ":stopwatch:": "⏱️"
   },
   "send_command_help": {
     "disabled_name": "❌ 사용할 수 없는 명령어",
@@ -313,7 +314,8 @@
     "discord_id": "\uD83C\uDDE9 디스코드 아이디",
     "nickname": "\uD83D\uDCDB 닉네임",
     "remarks": "❓ 비고",
-    "false": "아니오"
+    "false": "아니오",
+    "period": "⏱️ 활동 기간"
   },
   "get_state_emoji": {
     "not_handled": " ❗",
