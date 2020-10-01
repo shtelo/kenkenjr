@@ -62,22 +62,23 @@ async def attach_page_interface(bot: Bot, message: Message, states: Collection, 
     await message.add_reaction(PAGE_NEXT_EMOJI)
     page = 0
     pages = len(states)
-    while True:
-        try:
-            reaction, _ = await bot.wait_for(
-                'reaction_add', timeout=timeout,
-                check=check_reaction(bot, message, user, (PAGE_NEXT_EMOJI, PAGE_PREV_EMOJI)))
-        except asyncio.TimeoutError:
-            await try_to_clear_reactions(message)
-            break
-        else:
-            if reaction.emoji == PAGE_PREV_EMOJI:
-                page = (page - 1) % pages
+    if pages > 1:
+        while True:
+            try:
+                reaction, _ = await bot.wait_for(
+                    'reaction_add', timeout=timeout,
+                    check=check_reaction(bot, message, user, (PAGE_NEXT_EMOJI, PAGE_PREV_EMOJI)))
+            except asyncio.TimeoutError:
+                await try_to_clear_reactions(message)
+                break
             else:
-                page = (page + 1) % pages
-            await update_state(message, states[page])
-            await message.add_reaction(PAGE_PREV_EMOJI)
-            await message.add_reaction(PAGE_NEXT_EMOJI)
+                if reaction.emoji == PAGE_PREV_EMOJI:
+                    page = (page - 1) % pages
+                else:
+                    page = (page + 1) % pages
+                await update_state(message, states[page])
+                await message.add_reaction(PAGE_PREV_EMOJI)
+                await message.add_reaction(PAGE_NEXT_EMOJI)
 
 
 
