@@ -250,22 +250,33 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         start_message = await ctx.send(literal['start'])
         message = None
         _, replies = get_application_sheet()
-        query = tuple({q for q in query if q in (APPLICATION_RECEIVED, APPLICATION_APPROVED, APPLICATION_REJECTED)})
-        if not query:
-            query = (APPLICATION_RECEIVED,)
-        queried = [reply for reply in replies if not reply[APPLICATION_STATE] or reply[APPLICATION_STATE] in query]
+        query = tuple(set(query))
+        query_state = tuple(filter(lambda q: q in (APPLICATION_RECEIVED, APPLICATION_APPROVED, APPLICATION_REJECTED),
+                                   query))
+        query = tuple(filter(lambda q: q not in (APPLICATION_RECEIVED, APPLICATION_APPROVED, APPLICATION_REJECTED),
+                             query))
+        if not query_state:
+            if not query:
+                query_state = (APPLICATION_RECEIVED,)
+            else:
+                query_state = (APPLICATION_RECEIVED, APPLICATION_APPROVED, APPLICATION_REJECTED)
+        print(query, query_state)
+        queried = list(filter(lambda r: (not r[APPLICATION_STATE] or r[APPLICATION_STATE] in query_state) and
+                                        (not query or tuple(filter(lambda q: q in str(r), query))),
+                              replies))
+        query_str = ', '.join(query + query_state)
         count = len(queried)
         states = list()
         for i, reply in enumerate(reversed(queried)):
             reply_embed = get_application_embed(reply)
             reply_embed.set_footer(text=literal['footer'] % (i + 1, count))
             if message is None:
-                await start_message.edit(content=literal['done'] % (f'({", ".join(query)})', count),
+                await start_message.edit(content=literal['done'] % (query_str, count),
                                          embed=reply_embed)
                 message = start_message
             states.append(InterfaceState(message.edit, embed=reply_embed))
         if message is None:
-            await start_message.edit(content=literal['not_found'])
+            await start_message.edit(content=literal['not_found'] % query_str)
         else:
             await attach_page_interface(self.client, message, states, ctx.author)
 

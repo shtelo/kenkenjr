@@ -112,7 +112,7 @@
     "요트": "요트를 시작합니다. 규칙을 확인하려면 `<P>요트 도움말`을 사용해보세요.",
     "데크": "데크 내에서 사용할 때, 혹은 명령어 뒤에 확인할 데크를 입력할 때에는 해당 데크의 정보를 확인합니다. 이는 `<P>데크 정보`와 동일합니다. \n데크 밖에서 단독으로 사용하면 개설된 데크의 목록을 확인합니다. 이는 `<P>데크 목록`과 동일합니다.",
     "데크 갱신": "디스코드 서버로부터 데크의 정보를 읽어 켄켄이가 가지고 있는 정보를 갱신합니다.",
-    "데크 수락": "명령어 뒤에 가입신청을 수락할 데크를 명시하고 회원들을 나열하면 해당 회원의 가입신청을 수락합니다.",
+    "데크 수락": "명령어 뒤에 가입신청을 수락할 데크를 명시하고 회원을 적으면 해당 회원의 가입신청을 수락합니다.",
     "데크 간편수락": "가입신청을 승인하고자 하는 데크 내에서만 사용할 수 있습니다. 명령어 뒤에 아무 것도 붙이지 않으면 모든 가입신청을 수락합니다. 수락할 회원들을 나열하면 해당 회원의 가입신청만 수락합니다.",
     "데크 거절": "명령어 뒤에 가입신청을 거절할 데크를 명시하고 회원들을 나열하면 해당 회원의 가입신청을 거절합니다.",
     "데크 주제": "주제를 수정하려는 데크 내에서만 사용할 수 있습니다. 명령어 뒤에 적은 내용으로 주제를 수정합니다. 주제의 길이는 512자 이하여야 합니다. 주제를 완전히 지우려면 `<P>데크 주제 삭제`를 사용해보세요.",
@@ -325,8 +325,8 @@
   },
   "applications": {
     "start": "가입신청서 목록을 조회하고 있어... 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/",
-    "done": "가입신청서%s를 %s개 발견했어! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/",
-    "not_found": "새로운 가입신청서가 없어... 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/",
+    "done": "가입신청서(%s)를 %s개 발견했어! 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/",
+    "not_found": "가입신청서(%s)가 없어... 원본 문서를 확인하려면 이 링크로 들어가봐!\n> https://docs.google.com/spreadsheets/d/1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA/",
     "footer": "%s/%s 페이지"
   },
   "applications_all": {

@@ -241,8 +241,8 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
 
     @deck_.command(name='수락', aliases=('가입승인', '가입수락', '승인'))
     @wait_until_deck_handler_ready()
-    async def deck_accept(self, ctx: Context, deck: DeckConverter, member: Member, *members: Member):
-        await self.accept_joining(ctx, deck, *(member,) + members)
+    async def deck_accept(self, ctx: Context, deck: DeckConverter, *, member: Member):
+        await self.accept_joining(ctx, deck, *(member,))
 
     @deck_cooldown
     @deck_.command(name='간편수락', aliases=('간편승인',))
