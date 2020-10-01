@@ -58,11 +58,11 @@ async def attach_toggle_interface(bot: Bot, message: Message, primary_state: Emo
 
 async def attach_page_interface(bot: Bot, message: Message, states: Collection, user: User = None,
                                 timeout=DEFAULT_TIMEOUT):
-    await message.add_reaction(PAGE_PREV_EMOJI)
-    await message.add_reaction(PAGE_NEXT_EMOJI)
     page = 0
     pages = len(states)
     if pages > 1:
+        await message.add_reaction(PAGE_PREV_EMOJI)
+        await message.add_reaction(PAGE_NEXT_EMOJI)
         while True:
             try:
                 reaction, _ = await bot.wait_for(
