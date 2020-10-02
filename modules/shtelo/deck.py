@@ -54,7 +54,7 @@ class Deck:
     def __repr__(self):
         return f'<Deck public={self.public} nswf={self.nsfw} auto={self.auto} lock={self.lock} id={self.id} ' \
                f'manager={self.manager} pending={self.pending} name={self.name} topic={self.topic} ' \
-               f'chategory_channel={self.category_channel} default_channel={self.default_channel} role={self.role}>'
+               f'category_channel={self.category_channel} default_channel={self.default_channel} role={self.role}>'
 
     def to_channel_topic(self):
         deck_str = '*id: ' + self.id
