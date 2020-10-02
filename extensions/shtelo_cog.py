@@ -260,7 +260,6 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
                 query_state = (APPLICATION_RECEIVED,)
             else:
                 query_state = (APPLICATION_RECEIVED, APPLICATION_APPROVED, APPLICATION_REJECTED)
-        print(query, query_state)
         queried = list(filter(lambda r: (not r[APPLICATION_STATE] or r[APPLICATION_STATE] in query_state) and
                                         (not query or tuple(filter(lambda q: q in str(r), query))),
                               replies))
