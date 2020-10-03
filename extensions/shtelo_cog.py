@@ -288,7 +288,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         if remarks is None:
             remarks = member.id
         await self.receive_application(member, remarks, message.delete)
-        await ctx.message.edit(content=literal['done'] % member.mention)
+        await message.edit(content=literal['done'] % member.mention)
 
     @applications.command(name='승인')
     @guild_only()
