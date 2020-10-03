@@ -115,8 +115,8 @@ class DeckHandler:
 
     async def _fetch_all(self):
         await self.client.wait_until_ready()
-        await self._fetch_decks()
         self.guild = await self.client.fetch_guild(self.SHTELO_GUILD)
+        await self._fetch_decks()
         self.recycle_bin = await self.client.fetch_channel(self.RECYCLE_BIN_CATEGORY)
         self.manager_role = discord.utils.get(await self.guild.fetch_roles(), id=self.MANAGER_ROLE)
         self.ready = True

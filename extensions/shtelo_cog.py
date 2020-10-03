@@ -46,7 +46,7 @@ deck_cooldown = shared_cooldown(1, 60, BucketType.category)
 
 def get_application_sheet():
     sheet = get_constant('application')
-    rows = sheet_read(sheet['sheet_id'], sheet['range'])
+    rows = sheet_read(sheet['sheet_id'], sheet['read_range'])
     keys = rows.pop(0)
     for reply in rows:
         while len(reply) < len(keys):
@@ -88,7 +88,7 @@ async def update_application(member: Member, state: str, remarks: str, on_error=
             await on_error()
         raise BadArgument(f'application not found')
     rows.insert(0, keys)
-    sheet_write(sheet['sheet_id'], sheet['range'], rows)
+    sheet_write(sheet['sheet_id'], sheet['write_range'], list(map(lambda r: r[:-1], rows)))
     return result
 
 
@@ -288,7 +288,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         if remarks is None:
             remarks = member.id
         await self.receive_application(member, remarks, message.delete)
-        await message.edit(content=literal['done'] % member.mention)
+        await message.edit(content=literal['done'] % str(member))
 
     @applications.command(name='승인')
     @guild_only()

@@ -19,7 +19,8 @@
     "application": {
       "sheet_id": "1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA",
       "sheet_name": "Replies",
-      "range": "Replies!A1:P"
+      "read_range": "Replies!A1:P",
+      "write_range": "Replies!A1:O"
     },
     "regulation": {
       "doc_id": "17rg7J1gajNO1NVhbbPgjntSVqK1rn1gwh4DwIaEz9I4"
