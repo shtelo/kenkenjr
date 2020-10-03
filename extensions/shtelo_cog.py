@@ -32,7 +32,6 @@ MEMBER_LIST_JOINED_AT = 3
 
 APPLICATION_RECEIVED = '접수됨'
 APPLICATION_APPROVED = '승인됨'
-APPLICATION_REJECTED = '기각됨'
 
 SECOND_PER_HOUR = 3600
 
@@ -129,8 +128,6 @@ def get_application_state_emoji(application: list):
         return literal['received']
     elif application[APPLICATION_STATE] == APPLICATION_APPROVED:
         return literal['approved']
-    elif application[APPLICATION_STATE] == APPLICATION_REJECTED:
-        return literal['rejected']
     return literal['not_handled']
 
 
@@ -251,15 +248,15 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         message = None
         _, replies = get_application_sheet()
         query = tuple(set(query))
-        query_state = tuple(filter(lambda q: q in (APPLICATION_RECEIVED, APPLICATION_APPROVED, APPLICATION_REJECTED),
+        query_state = tuple(filter(lambda q: q in (APPLICATION_RECEIVED, APPLICATION_APPROVED),
                                    query))
-        query = tuple(filter(lambda q: q not in (APPLICATION_RECEIVED, APPLICATION_APPROVED, APPLICATION_REJECTED),
+        query = tuple(filter(lambda q: q not in (APPLICATION_RECEIVED, APPLICATION_APPROVED),
                              query))
         if not query_state:
             if not query:
                 query_state = (APPLICATION_RECEIVED,)
             else:
-                query_state = (APPLICATION_RECEIVED, APPLICATION_APPROVED, APPLICATION_REJECTED)
+                query_state = (APPLICATION_RECEIVED, APPLICATION_APPROVED)
         queried = list(filter(lambda r: (not r[APPLICATION_STATE] or r[APPLICATION_STATE] in query_state) and
                                         (not query or tuple(filter(lambda q: q in str(r), query))),
                               replies))
@@ -363,7 +360,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
 
     @applications.command(name='전체', aliases=('*',))
     async def applications_all(self, ctx: Context):
-        await self.applications(ctx, APPLICATION_RECEIVED, APPLICATION_APPROVED, APPLICATION_REJECTED)
+        await self.applications(ctx, APPLICATION_RECEIVED, APPLICATION_APPROVED)
 
     @modules.group(name='회칙')
     async def regulation(self, ctx: Context, *, keyword: str = ''):

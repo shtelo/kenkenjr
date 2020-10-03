@@ -6,6 +6,7 @@ from discord.ext.commands import Bot, Context, CommandNotFound, CheckFailure, Mi
     DisabledCommand, CommandOnCooldown, BadUnionArgument
 
 from modules.custom.custom_cog import CustomCog
+from utils import wrap_codeblock
 from utils.literal import get_cog, literals, get_constant
 from utils.log import Log
 
@@ -43,11 +44,11 @@ class LogCog(CustomCog, name=get_cog('LogCog')['name']):
                 isinstance(error, DisabledCommand))):
             handled = True
         if not handled:
-            error_message = f'{ctx.channel}/{ctx.author}\n```\n'
+            error_message = f'{ctx.channel}/{ctx.author}\n\n'
             error_message += '\n'.join(traceback.format_exception(etype=type(error), value=error,
                                                                   tb=error.__traceback__))
-            error_message += '\n```'
-            await self.owner.send(error_message)
+            for e in wrap_codeblock(error_message, markdown=''):
+                await self.owner.send(e)
         raise error
 
 
