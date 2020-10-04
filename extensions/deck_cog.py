@@ -433,6 +433,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
                 deck.manager.send(done_str, embed=deck_embed),
                 partner_channel.send(done_str, embed=deck_embed)])
         else:
+            check_deck_manager(deck, ctx.author)
             await asyncio.wait([partner_channel.send(literal['pending'].format(deck.name)),
                                 ctx.send(literal['applied'] % deck.name)])
 
