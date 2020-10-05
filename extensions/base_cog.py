@@ -10,14 +10,12 @@ from discord.ext.commands import Context, Bot, MemberConverter, BadArgument
 import modules
 from modules import CustomCog, tokens_len, ChainedEmbed, guild_only
 from utils import get_cog, get_path, Log, literals, get_emoji, attach_toggle_interface, EmojiInterfaceState, \
-    CHAR_MEDIALS, join_jamos_char
+    CHAR_MEDIALS, join_jamos_char, to_kst
 
 NICK_MAX_LENGTH = 32
 
 DETAIL_EMOJI = get_emoji(':question_mark:')
 FOLD_EMOJI = get_emoji(':x:')
-
-KST_DELTA = timedelta(hours=9)
 
 
 def get_profile_embed(user: User, brief: bool = True):
@@ -28,11 +26,11 @@ def get_profile_embed(user: User, brief: bool = True):
         profile_embed.set_author(name=user.guild.name + ' ' + user.top_role.name, icon_url=user.guild.icon_url)
     if not brief:
         profile_embed.set_image(url=user.avatar_url)
-        profile_embed.set_footer(text=f'{user.created_at + KST_DELTA} · {user.id}')
+        profile_embed.set_footer(text=f'{to_kst(user.created_at)} · {user.id}')
         if isinstance(user, Member):
-            profile_embed.add_field(name=literal['join'], value=user.joined_at + KST_DELTA)
+            profile_embed.add_field(name=literal['join'], value=to_kst(user.joined_at))
             if user.premium_since:
-                profile_embed.add_field(name=literal['boost'], value=str(user.premium_since + KST_DELTA))
+                profile_embed.add_field(name=literal['boost'], value=to_kst(user.premium_since))
             if roles := user.roles[1:]:
                 roles.reverse()
                 profile_embed.add_field(name=literal['roles'],
@@ -56,7 +54,7 @@ async def get_guild_profile_embed(guild: Guild, brief: bool = True):
         if online_members:
             guild_embed.add_field(name=literal['online'] % len(online_members),
                                   value='\n'.join([member.name for member in online_members]))
-        guild_embed.set_footer(text=f'{guild.created_at + KST_DELTA} · {guild.id}')
+        guild_embed.set_footer(text=f'{to_kst(guild.created_at)} · {guild.id}')
         guild_embed.set_image(url=guild.banner_url)
         if guild.channels:
             value = literal['category'] % len(guild.categories)
