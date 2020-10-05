@@ -20,7 +20,9 @@
       "sheet_id": "1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA",
       "sheet_name": "Replies",
       "read_range": "Replies!A1:P",
-      "write_range": "Replies!A1:O"
+      "write_range": "Replies!A1:O",
+      "insert_range": "Replies!A{0}:P{0}",
+      "active_time_formula": "= IF(OR(EQ(COUNTIF(Data!$B$3:$B$4, N{0}), 0), ISBLANK(A{0})), \"\", DATEDIF(A{0}, NOW(), \"D\"))"
     },
     "regulation": {
       "doc_id": "17rg7J1gajNO1NVhbbPgjntSVqK1rn1gwh4DwIaEz9I4"
@@ -583,7 +585,9 @@
   },
   "application_receive": {
     "start": "신청서를 접수하고 있어...",
-    "done": "%s의 신청서가 접수됐어!"
+    "done": "%s의 신청서가 접수됐어!",
+    "failed": "%s의 신청서를 찾을 수 없어...",
+    "subaccount": "부계정 %s -> %s"
   },
   "application_approve": {
     "start": "회원으로 승인하고 있어...",

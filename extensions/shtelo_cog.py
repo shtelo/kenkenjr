@@ -57,16 +57,17 @@ def get_application_of(member: Member, rows=None):
     if rows is None:
         _, rows = get_application_sheet()
     for row in reversed(rows):
-        if row[APPLICATION_SUBACCOUNT] == NO and str(member.id) in row[APPLICATION_REMARKS]:
+        if row[APPLICATION_SUBACCOUNT] == NO and str(member.id) in row[APPLICATION_REMARKS] \
+                or str(member) == row[APPLICATION_DISCORD_ID]:
             return row
-    return None
 
 
-def get_nickname(member: Member, rows=None):
+def get_nickname_of(member: Member, rows=None):
     if rows is None:
         _, rows = get_application_sheet()
     for row in rows:
-        if row[APPLICATION_SUBACCOUNT] == NO and str(member.id) in row[APPLICATION_REMARKS]:
+        if row[APPLICATION_SUBACCOUNT] == NO and str(member.id) in row[APPLICATION_REMARKS] \
+                or str(member) == row[APPLICATION_DISCORD_ID]:
             return row[APPLICATION_NICKNAME]
 
 
@@ -75,7 +76,7 @@ async def update_application(member: Member, state: str, remarks: str, on_error=
     if keys is None or rows is None:
         keys, rows = get_application_sheet()
     result = False
-    for row in rows:
+    for i, row in enumerate(rows):
         if str(member) in row and row[APPLICATION_STATE] != state:
             row[APPLICATION_STATE] = state
             if remarks is not None and not row[APPLICATION_REMARKS]:
@@ -86,8 +87,8 @@ async def update_application(member: Member, state: str, remarks: str, on_error=
         if on_error is not None:
             await on_error()
         raise BadArgument(f'application not found')
-    rows.insert(0, keys)
-    sheet_write(sheet['sheet_id'], sheet['write_range'], list(map(lambda r: r[:-1], rows)))
+    result[-1] = sheet['active_time_formula'].format(i + 2)
+    sheet_write(sheet['sheet_id'], sheet['insert_range'].format(i + 2), [result])
     return result
 
 
@@ -96,7 +97,7 @@ def add_member(member: Member, nickname=None, rows=None):
     if rows is None:
         rows = sheet_read(sheet['sheet_id'], sheet['range'])
     if nickname is None:
-        nickname = get_nickname(member)
+        nickname = get_nickname_of(member)
     result = [int(rows[-1][0]) + 1, nickname, str(member.roles[-1]), str(to_kst(member.joined_at))]
     rows.append(result.copy())
     if result:
@@ -282,8 +283,19 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
     async def application_receive(self, ctx: Context, member: Member, *, remarks: str = None):
         literal = literals('application_receive')
         message = await ctx.send(literal['start'])
+        keys, rows = get_application_sheet()
+        appilcation = get_application_of(member, rows)
+        if appilcation is None:
+            await message.edit(content=literal['failed'] % str(member))
         if remarks is None:
-            remarks = member.id
+            remarks = str(member.id)
+        if appilcation[APPLICATION_SUBACCOUNT] is not NO:
+            try:
+                main_account = await MemberConverter().convert(ctx, appilcation[APPLICATION_SUBACCOUNT])
+            except BadArgument:
+                pass
+            else:
+                remarks = literal['subaccount'] % (main_account.id, remarks)
         await self.receive_application(member, remarks, message.delete)
         await message.edit(content=literal['done'] % str(member))
 
