@@ -57,7 +57,7 @@ def get_application_of(member: Member, rows=None):
     if rows is None:
         _, rows = get_application_sheet()
     for row in reversed(rows):
-        if str(member) in row:
+        if row[APPLICATION_SUBACCOUNT] == NO and str(member.id) == row[APPLICATION_REMARKS]:
             return row
     return None
 
@@ -66,7 +66,7 @@ def get_nickname(member: Member, rows=None):
     if rows is None:
         _, rows = get_application_sheet()
     for row in rows:
-        if str(member) in row:
+        if row[APPLICATION_SUBACCOUNT] == NO and str(member.id) == row[APPLICATION_REMARKS]:
             return row[APPLICATION_NICKNAME]
 
 
