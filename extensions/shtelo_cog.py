@@ -243,9 +243,10 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
                                         embed=get_application_embed(application))
 
     @modules.group(name='가입신청서', aliases=('가입', '신청서'))
+    @partner_only()
     async def applications(self, ctx: Context, *query: str):
         literal = literals('applications')
-        start_message = await ctx.send(literal['start'])
+        start_message = await ctx.author.send(literal['start'])
         message = None
         _, replies = get_application_sheet()
         query = tuple(set(query))
