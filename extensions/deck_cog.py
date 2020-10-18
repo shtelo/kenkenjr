@@ -2,7 +2,7 @@ import asyncio
 from typing import Coroutine, Union
 
 import discord
-from discord import Member, Reaction, User, Role, Message, VoiceChannel, TextChannel
+from discord import Member, Reaction, User, Role, Message, VoiceChannel, TextChannel, PermissionOverwrite
 from discord.abc import GuildChannel
 from discord.ext.commands import Bot, Context, BadArgument, check, BucketType, MemberConverter
 
@@ -466,7 +466,15 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         literal = literals('channel_create_voice')
         deck: Deck = await DeckConverter().convert(ctx, str(ctx.channel.id))
         check_deck_manager(deck, ctx.author)
-        channel = await deck.category_channel.create_voice_channel(name)
+        tester_role: Role = ctx.guild.get_role(get_constant('tester_role'))
+        member_role: Role = ctx.guild.get_role(get_constant('member_role'))
+        overwrites = {
+            ctx.guild.default_role: PermissionOverwrite(view_channel=False, connect=False),
+            deck.role: PermissionOverwrite(view_channel=True, connect=True),
+            tester_role: PermissionOverwrite(view_channel=True),
+            member_role: PermissionOverwrite(view_channel=True)
+        }
+        channel = await deck.category_channel.create_voice_channel(name, overwrites=overwrites)
         await ctx.send(literal['done'] % channel.mention)
 
     @channel.group(name='삭제', aliases=('제거', '폐쇄'))

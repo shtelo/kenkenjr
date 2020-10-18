@@ -1,8 +1,7 @@
 import asyncio
-from datetime import datetime
 from typing import Optional
 
-from discord import Member, Message, TextChannel, Role, Reaction, User, Guild
+from discord import Member, Message, TextChannel, Role, Guild
 from discord.ext.commands import Bot, Context, BucketType, BadArgument, MemberConverter
 
 import modules
