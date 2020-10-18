@@ -3,7 +3,7 @@ import traceback
 
 from discord import Message, User
 from discord.ext.commands import Bot, Context, CommandNotFound, CheckFailure, MissingRequiredArgument, \
-    DisabledCommand, CommandOnCooldown, BadUnionArgument
+    DisabledCommand, CommandOnCooldown, BadUnionArgument, BadArgument
 
 from modules.custom.custom_cog import CustomCog
 from utils import wrap_codeblock
@@ -41,10 +41,11 @@ class LogCog(CustomCog, name=get_cog('LogCog')['name']):
                 isinstance(error, CheckFailure),
                 isinstance(error, BadUnionArgument),
                 isinstance(error, MissingRequiredArgument),
-                isinstance(error, DisabledCommand))):
+                isinstance(error, DisabledCommand),
+                isinstance(error, BadArgument))):
             handled = True
         if not handled:
-            error_message = f'{ctx.channel}/{ctx.author}\n\n'
+            error_message = f'{ctx.guild}/{ctx.channel}/{ctx.author}: {ctx.message.content}\n{ctx.message.jump_url}\n\n'
             error_message += '\n'.join(traceback.format_exception(etype=type(error), value=error,
                                                                   tb=error.__traceback__))
             for e in wrap_codeblock(error_message, markdown=''):
