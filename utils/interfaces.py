@@ -55,10 +55,10 @@ async def attach_toggle_interface(bot: Bot, message: Message, primary_state: Int
             break
         else:
             if reaction.emoji == TOGGLE_EXPAND_EMOJI:
-                await update_state(message, primary_state)
+                await update_state(message, secondary_state)
                 await message.add_reaction(TOGGLE_COLLAPSE_EMOJI)
             else:
-                await update_state(message, secondary_state)
+                await update_state(message, primary_state)
                 await message.add_reaction(TOGGLE_EXPAND_EMOJI)
     if after is not None:
         await after
