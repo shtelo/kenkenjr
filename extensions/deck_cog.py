@@ -9,7 +9,7 @@ from discord.ext.commands import Bot, Context, BadArgument, check, BucketType, M
 import modules
 from modules import CustomCog, ChainedEmbed, shared_cooldown, DeckHandler, Deck, DeckConverter, guild_only
 from utils import get_cog, literals, get_emoji, wrap_codeblock, get_constant, check_length, attach_toggle_interface, \
-    EmojiInterfaceState
+    InterfaceState
 
 FAILED_EMOJI = get_emoji(':negative_squared_cross_mark:')
 CONFIRM_EMOJI = get_emoji(':white_check_mark:')
@@ -442,7 +442,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
     @guild_only()
     @wait_until_deck_handler_ready()
     async def channel(self, ctx: Context, *, deck: DeckConverter = None):
-        await self.deck_info(ctx, deck)
+        await self.deck_info(ctx, deck=deck)
 
     @channel.group(name='생성', aliases=('추가', '개설'))
     @guild_only()
