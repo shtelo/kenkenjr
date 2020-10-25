@@ -566,7 +566,7 @@
     "author": "%s의 서버",
     "description": "**%s** 서버\n회원 **%s**명",
     "tier": "서버 부스트 **%s**단계",
-    "online": "☀️ 온라인 회원 **%s**명",
+    "online": "온라인 회원 **%s**명",
     "boost": "\uD83D\uDC8E 서버 부스트 **%s**회",
     "channel": "#️⃣ 생성된 채널 **%s**개",
     "category": "카테고리 **%s**개",
