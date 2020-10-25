@@ -165,7 +165,7 @@ class HelpCog(CustomCog, name=get_cog('HelpCog')['name']):
             if message is None:
                 message = await ctx.send(embed=page_embed)
             states.append(InterfaceState(callback=message.edit, embed=page_embed))
-        await attach_page_interface(self.client, message, states, ctx.author)
+        await attach_page_interface(self.client, message, states, user=ctx.author)
 
     async def send_command_help(self, ctx: Context, command: Command):
         literal = literals('send_command_help')

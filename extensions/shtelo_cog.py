@@ -275,7 +275,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         if message is None:
             await start_message.edit(content=literal['not_found'] % query_str)
         else:
-            await attach_page_interface(self.client, message, states, ctx.author)
+            await attach_page_interface(self.client, message, states, user=ctx.author, after=message.delete())
 
     @applications.command(name='접수')
     @guild_only()

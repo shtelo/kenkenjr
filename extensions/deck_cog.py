@@ -185,8 +185,9 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         message = await ctx.send(embed=await self.get_deck_embed(deck))
         await attach_toggle_interface(
             self.client, message,
-            EmojiInterfaceState(get_emoji(':x:'), message.edit, embed=await self.get_deck_embed(deck)),
-            EmojiInterfaceState(get_emoji(':question_mark:'), message.edit, embed=await self.get_deck_embed(deck, False)))
+            InterfaceState(message.edit, embed=(first_embed := await self.get_deck_embed(deck))),
+            InterfaceState(message.edit, embed=await self.get_deck_embed(deck, False)),
+            after=message.edit(embed=first_embed))
 
     @deck_.command(name='목록', aliases=('리스트', '전체'))
     @wait_until_deck_handler_ready()

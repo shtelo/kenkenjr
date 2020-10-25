@@ -1,21 +1,19 @@
+import re
 from datetime import timezone, timedelta
 from random import choice, random
 from re import findall, sub
 from typing import Union
 
-from discord import Message, User, Member, HTTPException, RawReactionActionEvent, Guild
+from discord import Message, User, Member, HTTPException, RawReactionActionEvent, Guild, PartialEmoji
 from discord.ext import commands
 from discord.ext.commands import Context, Bot, MemberConverter, BadArgument
 
 import modules
 from modules import CustomCog, tokens_len, ChainedEmbed, guild_only
-from utils import get_cog, get_path, Log, literals, get_emoji, attach_toggle_interface, EmojiInterfaceState, \
-    CHAR_MEDIALS, join_jamos_char, to_kst
+from utils import get_cog, get_path, Log, literals, get_emoji, attach_toggle_interface, CHAR_MEDIALS, join_jamos_char, \
+    to_kst, InterfaceState, attach_page_interface
 
 NICK_MAX_LENGTH = 32
-
-DETAIL_EMOJI = get_emoji(':question_mark:')
-FOLD_EMOJI = get_emoji(':x:')
 
 
 def get_profile_embed(user: User, brief: bool = True):
@@ -44,6 +42,8 @@ async def get_guild_profile_embed(guild: Guild, brief: bool = True):
     description = literal['description'] % (guild.region, guild.member_count)
     if guild.premium_tier:
         description += '\n' + literal['tier'] % guild.premium_tier
+    if online_members:
+        description += '\n' + (literal['online'] % len(online_members))
     guild_embed = ChainedEmbed(title=guild.name, description=description)
     guild_embed.set_author(name=literal['author'] % guild.owner.name, icon_url=guild.owner.avatar_url)
     guild_embed.set_thumbnail(url=guild.icon_url)
@@ -51,9 +51,6 @@ async def get_guild_profile_embed(guild: Guild, brief: bool = True):
         if guild.premium_subscription_count:
             guild_embed.add_field(name=literal['boost'] % guild.premium_subscription_count,
                                   value='\n'.join(str(subscriber) for subscriber in guild.premium_subscribers))
-        if online_members:
-            guild_embed.add_field(name=literal['online'] % len(online_members),
-                                  value='\n'.join([member.name for member in online_members]))
         guild_embed.set_footer(text=f'{to_kst(guild.created_at)} · {guild.id}')
         guild_embed.set_image(url=guild.banner_url)
         if guild.channels:
@@ -107,8 +104,15 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
             count = 2
         return count
 
-    @CustomCog.listener()
-    async def on_message(self, message: Message):
+    def get_custom_emoji_embed(self, emoji_id):
+        print(emoji_id)
+        emoji: PartialEmoji = self.client.get_emoji(emoji_id)
+        embed = ChainedEmbed()
+        embed.set_image(url=emoji.url)
+        embed.set_footer(text=f':{emoji.name}:')
+
+    @CustomCog.listener(name='on_message')
+    async def react_to_mention(self, message: Message):
         ctx: commands.Context = await self.client.get_context(message)
         if ctx.valid or message.author.id == self.client.user.id or self.protocol_cog.get_request(message) is not None:
             return
@@ -123,8 +127,8 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
                 await message.channel.send(''.join([choice(self.characters) for _ in range(count)])[:1997]
                                            + ''.join([choice(tuple('!?.')) for _ in range(3)]))
 
-    @CustomCog.listener()
-    async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
+    @CustomCog.listener(name='on_raw_reaction_add')
+    async def delete_message_on_reaction(self, payload: RawReactionActionEvent):
         if payload.emoji.name == get_emoji(':wastebasket:'):
             message = await (await self.client.fetch_channel(payload.channel_id)).fetch_message(payload.message_id)
             if message.author.id == self.client.user.id:
@@ -153,8 +157,9 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         message = await ctx.send(embed=profile_embed)
         await attach_toggle_interface(
             self.client, message,
-            EmojiInterfaceState(FOLD_EMOJI, message.edit, embed=get_profile_embed(user)),
-            EmojiInterfaceState(DETAIL_EMOJI, message.edit, embed=get_profile_embed(user, False)))
+            InterfaceState(message.edit, embed=(primary_embed := get_profile_embed(user))),
+            InterfaceState(message.edit, embed=get_profile_embed(user, False)),
+            after=message.edit(embed=primary_embed))
 
     @modules.command(name='거리두기', aliases=('사회적거리두기', '안전거리'))
     @guild_only()
@@ -187,8 +192,9 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         message = await ctx.send(embed=await get_guild_profile_embed(ctx.guild))
         await attach_toggle_interface(
             self.client, message,
-            EmojiInterfaceState(FOLD_EMOJI, message.edit, embed=await get_guild_profile_embed(ctx.guild)),
-            EmojiInterfaceState(DETAIL_EMOJI, message.edit, embed=await get_guild_profile_embed(ctx.guild, False)))
+            InterfaceState(message.edit, embed=(first_embed := await get_guild_profile_embed(ctx.guild))),
+            InterfaceState(message.edit, embed=await get_guild_profile_embed(ctx.guild, False)),
+            after=message.edit(embed=first_embed))
 
     # TODO add command about color pickers
 
