@@ -51,7 +51,7 @@ async def attach_toggle_interface(bot: Bot, message: Message, primary_state: Int
                 'reaction_add', timeout=timeout,
                 check=check_reaction(bot, message, user, *TOGGLE_EMOJIS))
         except asyncio.TimeoutError:
-            await try_to_clear_reactions(message, TOGGLE_EMOJIS)
+            await try_to_clear_reactions(message, *TOGGLE_EMOJIS)
             break
         else:
             if reaction.emoji == TOGGLE_EXPAND_EMOJI:
@@ -77,7 +77,7 @@ async def attach_page_interface(bot: Bot, message: Message, states: Collection, 
                     'reaction_add', timeout=timeout,
                     check=check_reaction(bot, message, user, *PAGE_EMOJIS))
             except asyncio.TimeoutError:
-                await try_to_clear_reactions(message)
+                await try_to_clear_reactions(message, *PAGE_EMOJIS)
                 break
             else:
                 if reaction.emoji == PAGE_PREV_EMOJI:
