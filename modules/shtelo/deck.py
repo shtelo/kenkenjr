@@ -196,6 +196,7 @@ class DeckHandler:
         deck = Deck(id=self.generate_new_id(), manager=manager, name=name, category_channel=category_channel,
                     default_channel=default_channel, role=role)
         await asyncio.wait([self.save_deck(deck), manager.add_roles(*roles)])
+        self.decks[deck.category_channel.id] = deck
         return deck
 
     async def remove_deck(self, deck: Deck):
