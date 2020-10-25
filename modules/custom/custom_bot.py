@@ -2,6 +2,7 @@ from asyncio import get_event_loop
 from os import listdir
 
 from decouple import config
+from discord import Intents
 from discord.ext.commands import ExtensionAlreadyLoaded, ExtensionFailed, NoEntryPointError, ExtensionError
 from discord.ext.commands.bot import Bot
 
@@ -11,7 +12,9 @@ from utils import get_path, get_constant, Log, singleton
 @singleton
 class CustomBot(Bot):
     def __init__(self, args: list):
-        super().__init__([get_constant('default_prefix')])
+        intents = Intents.default()
+        intents.members = True
+        super().__init__([get_constant('default_prefix')], intents=intents)
         self.load_all_extensions()
         get_event_loop().run_until_complete(self.start(config('TOKEN') if 'b' not in args else config('BETA_TOKEN')))
 
