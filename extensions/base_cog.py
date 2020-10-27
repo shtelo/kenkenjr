@@ -104,12 +104,12 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
             count = 2
         return count
 
-    def get_custom_emoji_embed(self, emoji_id):
-        print(emoji_id)
+    def get_custom_emoji_embed(self, emoji_id: int):
         emoji: PartialEmoji = self.client.get_emoji(emoji_id)
         embed = ChainedEmbed()
         embed.set_image(url=emoji.url)
         embed.set_footer(text=f':{emoji.name}:')
+        return embed
 
     @CustomCog.listener(name='on_message')
     async def react_to_mention(self, message: Message):
@@ -133,6 +133,22 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
             message = await (await self.client.fetch_channel(payload.channel_id)).fetch_message(payload.message_id)
             if message.author.id == self.client.user.id:
                 await message.delete()
+
+    @CustomCog.listener(name='on_message')
+    async def expand_custom_emoji(self, message: Message):
+        if message.guild is None:
+            return
+        emojis = re.compile(r'<:[a-zA-Z_]{2,}:\d{18}>').findall(message.content)
+        if emojis:
+            embeds = [self.get_custom_emoji_embed(int(emoji[-19:-1])) for emoji in emojis]
+            message = await message.channel.send(embed=embeds[0])
+            await attach_page_interface(self.client, message,
+                                        [InterfaceState(message.edit, embed=embed) for embed in embeds],
+                                        after=message.delete())
+
+    @CustomCog.listener(name='on_ready')
+    async def say_ready(self):
+        print('ready')
 
     @modules.command(name='안녕', aliases=('반가워', 'ㅎㅇ', 'greet', 'hi', 'hello'))
     async def greet(self, ctx: Context):
