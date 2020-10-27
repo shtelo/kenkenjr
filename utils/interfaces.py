@@ -37,8 +37,8 @@ def check_reaction(bot: Client, message: Message, user: User, *emojis):
     return check
 
 
-async def update_state(message: Message, state: InterfaceState):
-    await asyncio.wait([try_to_clear_reactions(message), state.callback(*state.args, **state.kwargs)])
+async def update_state(message: Message, state: InterfaceState, *clear_emojis):
+    await asyncio.wait([try_to_clear_reactions(message, *clear_emojis), state.callback(*state.args, **state.kwargs)])
 
 
 async def attach_toggle_interface(bot: Bot, message: Message, primary_state: InterfaceState,
@@ -55,10 +55,10 @@ async def attach_toggle_interface(bot: Bot, message: Message, primary_state: Int
             break
         else:
             if reaction.emoji == TOGGLE_EXPAND_EMOJI:
-                await update_state(message, secondary_state)
+                await update_state(message, secondary_state, *TOGGLE_EMOJIS)
                 await message.add_reaction(TOGGLE_COLLAPSE_EMOJI)
             else:
-                await update_state(message, primary_state)
+                await update_state(message, primary_state, *TOGGLE_EMOJIS)
                 await message.add_reaction(TOGGLE_EXPAND_EMOJI)
     if after is not None:
         await after
@@ -84,7 +84,7 @@ async def attach_page_interface(bot: Bot, message: Message, states: Collection, 
                     page = (page - 1) % pages
                 else:
                     page = (page + 1) % pages
-                await update_state(message, states[page])
+                await update_state(message, states[page], *PAGE_EMOJIS)
                 await message.add_reaction(PAGE_PREV_EMOJI)
                 await message.add_reaction(PAGE_NEXT_EMOJI)
     else:

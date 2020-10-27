@@ -108,7 +108,7 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
         emoji: PartialEmoji = self.client.get_emoji(emoji_id)
         embed = ChainedEmbed()
         embed.set_image(url=emoji.url)
-        embed.set_footer(text=f':{emoji.name}:')
+        embed.set_author(name=f':{emoji.name}:')
         return embed
 
     @CustomCog.listener(name='on_message')
@@ -138,7 +138,7 @@ class BaseCog(CustomCog, name=get_cog('BaseCog')['name']):
     async def expand_custom_emoji(self, message: Message):
         if message.guild is None:
             return
-        emojis = re.compile(r'<:[a-zA-Z_]{2,}:\d{18}>').findall(message.content)
+        emojis = re.compile(r'<:[a-zA-Z_0-9]{2,}:\d{18}>').findall(message.content)
         if emojis:
             embeds = [self.get_custom_emoji_embed(int(emoji[-19:-1])) for emoji in emojis]
             message = await message.channel.send(embed=embeds[0])
