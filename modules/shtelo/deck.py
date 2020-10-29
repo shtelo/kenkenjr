@@ -88,6 +88,8 @@ class Deck:
 
 @singleton
 class DeckHandler:
+    UPDATE_DELAY = 300
+
     RECYCLE_BIN_CATEGORY = 757466502202130512
     MANAGER_ROLE = 650534578880118820
     SHTELO_GUILD = 650533223520010261
@@ -111,6 +113,7 @@ class DeckHandler:
         self.decks: Optional[dict] = None
         self.ready: bool = False
         self.recycle_bin: Optional[CategoryChannel] = None
+        self.changes: list = list()
         client.loop.create_task(self._fetch_all())
 
     async def _fetch_all(self):
@@ -180,9 +183,17 @@ class DeckHandler:
                     role=deck_role)
         self.decks[category_id] = deck
 
-    async def save_deck(self, deck: Deck):
-        await deck.default_channel.edit(topic=deck.to_channel_topic())
+    async def update_deck(self, deck: Deck):
+        async def _update_deck():
+            self.changes.append(deck.category_channel.id)
+            await asyncio.sleep(self.UPDATE_DELAY)
+            if self.changes.count(deck.category_channel.id) == 1 \
+                    and deck.default_channel.topic != (new_topic := deck.to_channel_topic()):
+                await deck.default_channel.edit(topic=new_topic)
+            if deck.category_channel.id in self.changes:
+                self.changes.remove(deck.category_channel.id)
         self.decks[deck.category_channel.id] = deck
+        self.client.loop.create_task(_update_deck())
 
     async def add_deck(self, name: str, manager: Member):
         role: object = await self.guild.create_role(name=name)
@@ -195,7 +206,7 @@ class DeckHandler:
         default_channel = await self.guild.create_text_channel(name, category=category_channel)
         deck = Deck(id=self.generate_new_id(), manager=manager, name=name, category_channel=category_channel,
                     default_channel=default_channel, role=role)
-        await asyncio.wait([self.save_deck(deck), manager.add_roles(*roles)])
+        await asyncio.wait([self.update_deck(deck), manager.add_roles(*roles)])
         self.decks[deck.category_channel.id] = deck
         return deck
 

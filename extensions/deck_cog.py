@@ -21,8 +21,6 @@ DECK_END_TIMEOUT = 30
 
 CHANNEL_DELETE_DELAY = 120
 
-deck_cooldown = shared_cooldown(1, 60, BucketType.category)
-
 
 def wait_until_deck_handler_ready():
     async def predicate(ctx: Context) -> bool:
@@ -106,7 +104,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
                 if (e := coro.exception()) is not None:
                     await self.deck_handler.fetch_deck(deck.default_channel)
                     raise e
-            await self.deck_handler.save_deck(deck)
+            await self.deck_handler.update_deck(deck)
             await message.edit(content=literal['done'] % (' '.join([str(member) for member in pending]), deck.name))
 
     async def edit_deck_topic(self, ctx: Context, deck: Deck, new_topic: str):
@@ -145,7 +143,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         if deck_embed is None:
             deck_embed = await self.get_deck_embed(deck)
         if save is None:
-            save = self.deck_handler.save_deck(deck)
+            save = self.deck_handler.update_deck(deck)
         message = await ctx.send(literal['start'], embed=deck_embed)
         await save
         await message.edit(content=literal['done'] % deck.name)
@@ -237,7 +235,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             deck.pending.append(author)
             tasks = [ctx.send(literal['applied'] % deck.name),
                      deck.manager.send(literal['pending'] % (str(author), deck.name, deck.id, str(author))),
-                     self.deck_handler.save_deck(deck)]
+                     self.deck_handler.update_deck(deck)]
             await asyncio.wait(tasks)
 
     @deck_.command(name='수락', aliases=('가입승인', '가입수락', '승인'))
@@ -245,18 +243,16 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
     async def deck_accept(self, ctx: Context, deck: DeckConverter, *, member: Member):
         await self.accept_joining(ctx, deck, *(member,))
 
-    @deck_cooldown
     @deck_.command(name='간편수락', aliases=('간편승인',))
-    @guild_only()
     @wait_until_deck_handler_ready()
-    async def deck_quick_accept(self, ctx: Context, *members: Member):
+    async def deck_quick_accept(self, ctx: Context, deck: DeckConverter = None):
         literal = literals('deck_quick_accept')
-        if (deck := self.deck_handler.get_deck_by_channel(ctx.channel)) is None:
-            await ctx.send(literal['failed'])
-            ctx.command.reset_cooldown(ctx)
-            return
-        if not members:
-            members = deck.pending
+        if deck is None:
+            if (deck := self.deck_handler.get_deck_by_channel(ctx.channel)) is None:
+                await ctx.send(literal['failed'])
+                ctx.command.reset_cooldown(ctx)
+                return
+        members = deck.pending
         await self.accept_joining(ctx, deck, *members)
 
     @deck_.command(name='거절', aliases=('거부', '기각'))
@@ -271,7 +267,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         for member in pending:
             deck.pending.remove(member)
         await ctx.send(literal['done'] % (' '.join([str(member) for member in pending]), deck.name))
-        await self.deck_handler.save_deck(deck)
+        await self.deck_handler.update_deck(deck)
 
     @deck_.command(name='탈퇴', aliases=('나가기',))
     @wait_until_deck_handler_ready()
@@ -287,7 +283,7 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             if author in deck.pending:
                 deck.pending.remove(author)
                 await ctx.send(literal['cancelled'] % deck.name)
-                await self.deck_handler.save_deck(deck)
+                await self.deck_handler.update_deck(deck)
                 return
             await ctx.send(literal['already'])
             return
@@ -297,7 +293,6 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         await author.remove_roles(deck.role)
         await author.send(literal['done'] % deck.name)
 
-    @deck_cooldown
     @deck_.group(name='주제', aliases=('설명',))
     @wait_until_deck_handler_ready()
     async def deck_topic(self, ctx: Context, *, new_topic: str = ''):
@@ -310,7 +305,6 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         check_length(new_topic, Deck.TOPIC_MAX_LENGTH)
         await self.edit_deck_topic(ctx, deck, new_topic)
 
-    @deck_cooldown
     @deck_topic.command(name='삭제', aliases=('제거',))
     @wait_until_deck_handler_ready()
     async def deck_topic_remove(self, ctx: Context):
@@ -318,7 +312,6 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
         check_deck_manager(deck, ctx.author)
         await self.edit_deck_topic(ctx, deck, '')
 
-    @deck_cooldown
     @deck_.command(name='아이디', aliases=('id',))
     @wait_until_deck_handler_ready()
     async def deck_id(self, ctx: Context, new_id: str = ''):
@@ -339,7 +332,6 @@ class DeckCog(CustomCog, name=get_cog('DeckCog')['name']):
             await ctx.send(literal['failed'] % new_id)
             ctx.command.reset_cooldown(ctx)
 
-    @deck_cooldown
     @deck_.command(name='이름')
     @wait_until_deck_handler_ready()
     async def deck_name(self, ctx: Context, *, new_name: str = ''):
