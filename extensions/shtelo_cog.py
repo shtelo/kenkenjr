@@ -98,7 +98,7 @@ def add_member(member: Member, nickname=None, rows=None):
         rows = sheet_read(sheet['sheet_id'], sheet['range'])
     if nickname is None:
         nickname = get_nickname_of(member)
-    result = [int(rows[-1][0]) + 1, nickname, str(member.roles[-1]), member.id, str(to_kst(member.joined_at))]
+    result = [int(rows[-1][0]) + 1, nickname, str(member.roles[-1]), str(member.id), str(to_kst(member.joined_at))]
     rows.append(result.copy())
     if result:
         sheet_write(sheet['sheet_id'], sheet['range'], rows)
