@@ -287,6 +287,7 @@ class ShteloCog(CustomCog, name=get_cog('ShteloCog')['name']):
         appilcation = get_application_of(member, rows)
         if appilcation is None:
             await message.edit(content=literal['failed'] % str(member))
+            return
         if remarks is None:
             remarks = str(member.id)
         if appilcation[APPLICATION_SUBACCOUNT] is not NO:
