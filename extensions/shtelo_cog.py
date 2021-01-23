@@ -27,7 +27,8 @@ APPLICATION_PERIOD = 15
 MEMBER_LIST_NUMBER = 0
 MEMBER_LIST_NICKNAME = 1
 MEMBER_LIST_STATE = 2
-MEMBER_LIST_JOINED_AT = 3
+MEMBER_LIST_ID = 3
+MEMBER_LIST_JOINED_AT = 4
 
 APPLICATION_RECEIVED = '접수됨'
 APPLICATION_APPROVED = '승인됨'
@@ -97,7 +98,7 @@ def add_member(member: Member, nickname=None, rows=None):
         rows = sheet_read(sheet['sheet_id'], sheet['range'])
     if nickname is None:
         nickname = get_nickname_of(member)
-    result = [int(rows[-1][0]) + 1, nickname, str(member.roles[-1]), str(to_kst(member.joined_at))]
+    result = [int(rows[-1][0]) + 1, nickname, str(member.roles[-1]), member.id, str(to_kst(member.joined_at))]
     rows.append(result.copy())
     if result:
         sheet_write(sheet['sheet_id'], sheet['range'], rows)
