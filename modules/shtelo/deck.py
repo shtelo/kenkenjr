@@ -6,7 +6,8 @@ from re import match, sub
 from typing import Optional, Union
 
 import discord
-from discord import Guild, Client, TextChannel, CategoryChannel, VoiceChannel, Member, Role, PermissionOverwrite
+from discord import Guild, Client, TextChannel, CategoryChannel, VoiceChannel, Member, Role, PermissionOverwrite, \
+    NotFound
 from discord.abc import GuildChannel
 from discord.ext.commands import Converter, Context, TextChannelConverter, BadArgument, \
     VoiceChannelConverter, CategoryChannelConverter, CommandError
@@ -165,7 +166,10 @@ class DeckHandler:
             raw = raw.split('\n', 1)[-1]
         else:
             deck_settings = tuple()
-        deck_manager = await self.guild.fetch_member(mention_to_id(match('^' + self.MANAGER_REGEX, raw).group()[5:]))
+        try:
+            deck_manager = await self.guild.fetch_member(mention_to_id(match('^' + self.MANAGER_REGEX, raw).group()[5:]))
+        except NotFound:
+            return
         if '\n' in raw:
             raw = raw.split('\n', 1)[-1]
         deck_pending = list()

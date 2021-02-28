@@ -19,9 +19,9 @@
     "application": {
       "sheet_id": "1lbJxTqltxpLubjXESCLoNBco4EYiNwi4HzZxdfFNluA",
       "sheet_name": "Replies",
-      "read_range": "Replies!A1:P",
-      "write_range": "Replies!A1:O",
-      "insert_range": "Replies!A{0}:P{0}",
+      "read_range": "Replies!A1:T",
+      "write_range": "Replies!A1:T",
+      "insert_range": "Replies!A{0}:T{0}",
       "active_time_formula": "= IF(OR(EQ(COUNTIF(Data!$B$3:$B$4, N{0}), 0), ISBLANK(A{0})), \"\", DATEDIF(A{0}, NOW(), \"D\"))"
     },
     "regulation": {
