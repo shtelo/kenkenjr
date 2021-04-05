@@ -49,7 +49,7 @@
     "greetings": "./kenkenjr/data/greetings.txt",
     "verboses": "./kenkenjr/data/verboses.txt",
     "reactions": "./kenkenjr/data/reactions.txt",
-    "spreadsheets_credentials": "./kenkenjr/data/google_api/spreadsheets/credentials.json",
+    "spreadsheets_credentials": "./kenkenjr/data/google_api/spreadsheets/client_secret_656760690922-hj5b39ou8056lieimi8627pqtl2kni8n.apps.googleusercontent.com.json",
     "spreadsheets_token": "./kenkenjr/data/google_api/spreadsheets/token.pickle",
     "docs_credentials": "./kenkenjr/data/google_api/docs/credentials.json",
     "docs_token": "./kenkenjr/data/google_api/docs/token.json"
