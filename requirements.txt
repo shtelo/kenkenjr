@@ -8,6 +8,6 @@ google-auth-httplib2==0.0.4
 google-auth-oauthlib==0.4.1
 googleapis-common-protos==1.52.0
 python-slugify==4.0.1
-setuptools==50.3.0
+setuptools==65.5.1
 python-decouple==3.3
 gspread==3.6.0
